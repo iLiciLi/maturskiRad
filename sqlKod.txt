@@ -3,22 +3,26 @@ Maturski rad kod :
 Tekst za maturski rad :
 
 Potrebno je napraviti bazu podataka za Košarkašku Ligu Srbije.
-Liga se sastoji iz 16 timova. 
-Svaki tim ima svoj naziv, logotip, adresu, kontakt informacije(telefon, email) i dvoranu u kojoj se igraju utakmice. 
-Jedan tim ima jedan stručni štab koji može imati jednog glavnog trenera, jednog ili više pomoćnih trenera,
-jednog ili više službenih predstavnika, jednog ili više pratilaca, jednog ili više lekara.
-Za trenere (i glavne i pomoćne) se pamte njihove licence, imena i prezimena, a za pratioce, službene predstavnike i lekare id,ime i prezime.
-Kod službenih predstavnika je licenca opciona.
-Jedan tim može imati 5 ili više igrača i igrači mogu igrati za samo jedan tim.
-Svaki igrač ima svoj evidencijski broj, ime, prezime, broj dresa, poziciju koju igra kao i godište i visina.
-Jedan igrač može igrati jednu ili više utakmica tokom sezone kao i što jedna utakmica može biti igrana od strane više igrača.
-Takođe treba voditi i statistiku svakog igrača nakon utakmice koju je odigrao.
-Ona treba obuhvatati broj poena tog igrača kao procenat šuta za 1,2 i 3 poena, takođe pratiti i broj skokova, broj asistencija, broj blokova, broj minuta u igri, broj ukradenih i izgubljenih lopti,...
-Utakmica pamti dvoranu u kojoj je odigrana.
-Jednu utakmicu mogu igrati 2 tima (i tim može igrati više utakmica tokom sezone) i utakmicu mogu suditi jedan ili više sudija.
-Zajednički entitet između tabela Tim i Utakmica pamti id domaćeg i id protivničkog tima kao i rezultat, broj gledalaca,delegat i datum kada je utakmica odigrana.
-Tokom trajanja sezone postoji rang lista na kojoj mogu biti jedan ili više timova.
-Lista prati broj utakmica, pobede/poraze,date koševe/promašene koševe (KD:KP),razliku datih i promašenih koševa (KR) i broj bodova.
+Liga se sastoji iz 16 timova.
+
+Svaki tim ima svoj naziv, logotip, adresu, kontakt informacije(telefon, email) i dvoranu.
+Tim ima jednog ili više zaposlenih za koje se pamti id, ime, prezime i slika, a takođe Zaposleni tabela sadrži i foreign key kojim se zna da li je zaposleni glavni trener,pomoćni trener,lekar,pratilac ili službeni predstavnik (za tabelu o kategoriji zaposlenog se pamti id i naziv te kategorije).
+Tokom sezone se prati plasman timova stoga je potrebno imati i entitet o rang listi timova koji može sadržati informacije o jednom ili više timova i u kojoj se prati trenutno kolo sezone, pobede/porazi tima,dati koševi/promašeni koševe (KD:KP),razlika datih i promašenih koševa (KR) i broj bodova.
+Jedan tim može imati jednog ili više igrača. Za svakog igrača potrebno je imati njegov evidencioni broj, ime, prezime, broj dresa, godište, visinu, poziciju i sliku.
+Timovi mogu odigrati jednu ili više utakmica i jedna utakmica može biti odigrana od strane 2 tima.
+
+Potrebno je pratiti utakmice u kojima se timovi takmiče, stoga entitet Utakmica pamti rezulat, delegat, broj gledalaca, datum kada je utakmica odigrana kao i strane ključeve (id-jeve za domaći i protivnički tim).
+
+Nakon utakmice se treba znati i statistika svakog igrača sa iste, zato je potrebno imati entitet o Statistici igrača na utakmici za koji će se gledati broj poena igrača,broj pogodaka za 1,2 i 3 poena, procenat šuteva kao i skokovi, asistencije, blokovi i broj minuta koji je igrač proveo na parketu.
+
+Igrač može odigrati jednu ili više utakmica i jedna utakmica može biti odigrana od strane više igrača.
+
+Za svaku utakmicu se mora znati dvorana u kojoj je odigrana pa tako u jednoj dvorani može da se odigra jedna ili više utakmica. Za dvoranu se pamti njen id i naziv.
+
+Sudija može da sudi na jednoj ili više utakmica i Utakmica može da bude suđena od strane jednog ili više sudija.
+Entitet Sudija beleži id, ime, prezime, mesto iz kojeg sudija dolazi i sliku.
+
+
 
 
 PRAVLJENJE TABELA :
