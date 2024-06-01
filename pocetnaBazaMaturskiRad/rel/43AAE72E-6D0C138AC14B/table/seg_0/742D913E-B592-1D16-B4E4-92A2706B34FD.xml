@@ -1,0 +1,50 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="742D913E-B592-1D16-B4E4-92A2706B34FD" name="DVORANA_UTAKMICE">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>298A3BFD-A0B3-7218-4423-972A0177D57C</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="id" id="F4BAA6EB-B853-50E3-886A-731C4ACCAF86">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>1DB0C0AF-84BD-EFAE-0C8A-34CEF9FF24F4</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>3</dataTypeSize>
+<ownDataTypeParameters>3,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="naziv" id="4D6D355A-3F6B-9C24-CD3D-552AB8BD8858">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>3CFD628C-5A2E-9806-F59D-C153858C713C</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>50</dataTypeSize>
+<ownDataTypeParameters>50,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="DB5EC6AF-FCEE-346F-E310-4E55775834D2" name="UTAKMICA_PK">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>9C6C7329-6E9E-222C-7F83-A2091583DA4B</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="F4BAA6EB-B853-50E3-886A-731C4ACCAF86"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

@@ -1,0 +1,149 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="B669946F-177B-1FED-9770-8A8290836243" name="ZAPOSLENI">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 15:53:02 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="id" id="BBBD1DC5-A2D1-5008-0DBD-A0E32837154C">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 15:53:23 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="ime" id="D746B2EB-B23F-B6E4-A4AE-24671421801D">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 15:53:11 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>12</dataTypeSize>
+<ownDataTypeParameters>12,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="prezime" id="DF0CFF03-F512-7E42-02B7-E4B395AF0995">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 15:53:19 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>20</dataTypeSize>
+<ownDataTypeParameters>20,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="specijalnost" id="3F5736EC-2876-9791-AB69-57DBA29E28BC">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 15:56:20 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>15</dataTypeSize>
+<ownDataTypeParameters>15,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="slika" id="7D2203D8-2255-8F1C-2AA7-F68765AD25DB">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 16:13:14 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>150</dataTypeSize>
+<ownDataTypeParameters>150,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id2" id="3C17BBB9-8378-8AE5-7555-798655A8A3D2">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-22 07:47:21 UTC</createdTime>
+<generatorID>6ED52BA6-683D-229B-95C4-2D6C78375790</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<referedAttribute>7E325E4A-8261-68D3-B4F1-80AC0C1975A5</referedAttribute>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>2</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id1" id="E897C9F8-3172-BE87-0A75-71B09426C395">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:12:47 UTC</createdTime>
+<generatorID>94CAFCFD-9A65-D4ED-905C-DD37925AC2D0</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<referedAttribute>2EB7DE81-AAC8-2B3B-A30E-D4EB57AE6326</referedAttribute>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>7</dataTypePrecision>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="id11" id="A2D6EF44-0BBD-C0B4-A203-AACDE1660855">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:27:38 UTC</createdTime>
+<generatorID>6ED52BA6-683D-229B-95C4-2D6C78375790</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<referedAttribute>4951607C-CF63-7CE8-C1C0-0A19E6CE1A26</referedAttribute>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>1</dataTypePrecision>
+<dataTypeScale>4</dataTypeScale>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+<identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
+<identifier id="1E9FD073-DCA9-B140-A423-1BE7D6789A8C" name="TRENER PK">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 15:53:10 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<shouldEngineer>false</shouldEngineer>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="false"/>
+</engineerTo>
+<pk>true</pk>
+<usedAttributes>
+<attributeRef>BBBD1DC5-A2D1-5008-0DBD-A0E32837154C</attributeRef>
+<attributeRef>E897C9F8-3172-BE87-0A75-71B09426C395</attributeRef>
+<attributeRef>A2D6EF44-0BBD-C0B4-A203-AACDE1660855</attributeRef>
+</usedAttributes>
+</identifier>
+</identifiers>
+</Entity>

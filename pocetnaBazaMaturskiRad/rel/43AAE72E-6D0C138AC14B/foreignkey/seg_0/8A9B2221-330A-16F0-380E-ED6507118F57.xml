@@ -1,0 +1,17 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="8A9B2221-330A-16F0-380E-ED6507118F57" containerWithKeyObject="8F8EFEB6-A95F-C29A-03AC-E3B3918031C7" localFKIndex="009B6D86-3B01-AEB6-E4EF-5568013FFDA1" name="ZAPOSLENI_KATEGORIJA_ZAP_FK">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:31:18 UTC</createdTime>
+<generatorID>94CAFCFD-9A65-D4ED-905C-DD37925AC2D0</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<referredTableLongName>KATEGORIJA_ZAP</referredTableLongName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>92EEBFBB-8051-A247-644B-3F04EE43F603</referredTableID>
+<keyObject>3957E32D-66DE-D096-2BD4-B29D83DE352C</keyObject>
+<referredKeyID>3957E32D-66DE-D096-2BD4-B29D83DE352C</referredKeyID>
+<mandatory>true</mandatory>
+<refColNames>id</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

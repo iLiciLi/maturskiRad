@@ -1,0 +1,100 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="F7FEF916-0CB8-CF72-70A6-60FBE11F9D0D" name="RANG_LISTA_TIMOVA">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>14F7A02E-2322-641D-41B6-645EBA5C06E4</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="id" id="D8CB0326-4612-3526-89C6-D2A296C9E2A1">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>C62A230B-F604-7935-06BF-4507F4F89DF4</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>1</dataTypePrecision>
+<dataTypeScale>4</dataTypeScale>
+<ownDataTypeParameters>,1,4</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="ut" id="F4CDFD74-0291-0486-2404-0007302CD81B">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>96DE812B-43B2-118B-BCB0-E9D683A36E01</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>1</dataTypePrecision>
+<dataTypeScale>4</dataTypeScale>
+<ownDataTypeParameters>,1,4</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="p_i" id="88DB08B0-FA10-CF1F-3CA0-B6D339951A6A">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>20E14EE2-88DF-3572-FA6C-A528510CEABD</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>15</dataTypeSize>
+<ownDataTypeParameters>15,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="kd_kp" id="6DA23B7D-3B8C-60E5-8C6B-069B994DD8B0">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>49A5CD31-721E-8A98-5236-E6325F4CBF06</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>15</dataTypeSize>
+<ownDataTypeParameters>15,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="kr" id="FE745E84-5D28-5345-C0CC-962A900D93F7">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>1DF1196C-CB49-67A1-E8FB-79E5A232AADC</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>10</dataTypeSize>
+<ownDataTypeParameters>10,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="bodovi" id="BE25C452-0937-9E3A-CDDC-3208A45C4424">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>F1DFCA6D-CA5E-29E1-FB63-B2AC43C39CB2</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="A78092A2-1412-1646-80B6-59C6788A13EC" name="RANG_LISTA_TIMOVA_PK">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>C7123620-BC61-4A70-6C6A-B9E1863E87DB</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="D8CB0326-4612-3526-89C6-D2A296C9E2A1"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

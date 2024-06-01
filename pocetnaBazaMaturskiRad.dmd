@@ -1,0 +1,8 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="pocetnaBazaMaturskiRad" id="3369597A-6F3E-A8F4-18B6-3C26CDC6B8C5" version="3.5">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 15:45:39 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<capitalNames>false</capitalNames>
+<designId>3369597A-6F3E-A8F4-18B6-3C26CDC6B8C5</designId>
+</OSDM_Design>

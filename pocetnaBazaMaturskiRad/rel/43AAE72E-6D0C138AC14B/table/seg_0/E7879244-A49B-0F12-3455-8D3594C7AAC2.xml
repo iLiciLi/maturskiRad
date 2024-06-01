@@ -1,0 +1,139 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="E7879244-A49B-0F12-3455-8D3594C7AAC2" name="TIM">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>1F22D91D-4B97-9B30-1C79-2964DBA07768</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="id" id="B5C18DA0-ABF2-6B80-AD63-4D7C50A78D8E">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>7E325E4A-8261-68D3-B4F1-80AC0C1975A5</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>2</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,2,2</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="naziv" id="2802D42F-CF5B-44DB-CEC2-330239856114">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>8928C3F5-BCFF-E61F-7D92-7B240EDE323F</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>50</dataTypeSize>
+<ownDataTypeParameters>50,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="logo" id="CBF30B77-24B4-75D8-0F1B-B7B0774E2967">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>C1857991-084A-DD68-1618-64B36D2472F2</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>150</dataTypeSize>
+<ownDataTypeParameters>150,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="adresa" id="40328360-523C-904D-80E8-028473D1C014">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>889658F3-58F2-8B76-27D3-CBE2C34C2EAB</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>50</dataTypeSize>
+<ownDataTypeParameters>50,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="telefon" id="C7A93DC8-BE0D-C1C0-98F7-3C398A8D6275">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>563F97AE-CF52-ECCD-2232-24F9A13C6DC6</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>30</dataTypeSize>
+<ownDataTypeParameters>30,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="email" id="031F8930-941B-38D5-2359-94DC1758758E">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>423E50ED-528A-70A7-56A7-EBE792DCC577</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>50</dataTypeSize>
+<ownDataTypeParameters>50,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="dvorana" id="C3756E59-3155-E5C6-A0A5-2B57C98FAC21">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>CB001C93-141A-93CB-21E8-7566AA8FE7E9</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>50</dataTypeSize>
+<ownDataTypeParameters>50,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="RANG_LISTA_TIMOVA_id" id="56BFB072-8335-389D-B685-C4BCECE83774">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:31:18 UTC</createdTime>
+<generatorID>4951607C-CF63-7CE8-C1C0-0A19E6CE1A26</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>1</dataTypePrecision>
+<dataTypeScale>4</dataTypeScale>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="1355E723-A4BE-2F69-798A-66849DD6959B" referredColumn="D8CB0326-4612-3526-89C6-D2A296C9E2A1"/>
+</associations>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="0A1ECE77-4E61-835A-F292-45DFBA44A096" name="TIM_PK">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-14 22:22:42 UTC</createdTime>
+<generatorID>BF4CEFDA-EE59-F38A-4D54-3BD53797223D</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="B5C18DA0-ABF2-6B80-AD63-4D7C50A78D8E"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="C8B98C31-6599-B100-10A2-FB842C4C7AAC" name="TIM_RANG_LISTA_TIMOVA_FK">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:31:18 UTC</createdTime>
+<generatorID>5AE57C37-8146-64B8-A0D5-949430A67D04</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="56BFB072-8335-389D-B685-C4BCECE83774"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

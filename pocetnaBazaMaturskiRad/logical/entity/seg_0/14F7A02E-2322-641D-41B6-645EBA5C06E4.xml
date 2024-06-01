@@ -1,0 +1,119 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Entity class="oracle.dbtools.crest.model.design.logical.Entity" directorySegmentName="seg_0" id="14F7A02E-2322-641D-41B6-645EBA5C06E4" name="RANG_LISTA_TIMOVA">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 18:10:32 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<adequatelyNormalized>NO</adequatelyNormalized>
+<expectedVolumes>0</expectedVolumes>
+<fwdEngineeringStrategyName>Single Table</fwdEngineeringStrategyName>
+<growthPercent>0</growthPercent>
+<growthType>Year</growthType>
+<maxVolumes>9999999</maxVolumes>
+<minVolumes>0</minVolumes>
+<normalForm>Third</normalForm>
+<attributes itemClass="oracle.dbtools.crest.model.design.logical.Attribute">
+<Attribute name="id" id="C62A230B-F604-7935-06BF-4507F4F89DF4">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 18:14:14 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>1</dataTypePrecision>
+<dataTypeScale>4</dataTypeScale>
+<ownDataTypeParameters>,1,4</ownDataTypeParameters>
+</Attribute>
+<Attribute name="ut" id="96DE812B-43B2-118B-BCB0-E9D683A36E01">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 18:14:18 UTC</createdTime>
+<generatorID>221CB5F2-5E33-6D25-F40A-A71B904B8D5C</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>1</dataTypePrecision>
+<dataTypeScale>4</dataTypeScale>
+<ownDataTypeParameters>,1,4</ownDataTypeParameters>
+</Attribute>
+<Attribute name="p_i" id="20E14EE2-88DF-3572-FA6C-A528510CEABD">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 18:16:04 UTC</createdTime>
+<generatorID>221CB5F2-5E33-6D25-F40A-A71B904B8D5C</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>15</dataTypeSize>
+<ownDataTypeParameters>15,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="kd_kp" id="49A5CD31-721E-8A98-5236-E6325F4CBF06">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 18:16:15 UTC</createdTime>
+<generatorID>221CB5F2-5E33-6D25-F40A-A71B904B8D5C</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>15</dataTypeSize>
+<ownDataTypeParameters>15,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="kr" id="1DF1196C-CB49-67A1-E8FB-79E5A232AADC">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 18:16:24 UTC</createdTime>
+<generatorID>221CB5F2-5E33-6D25-F40A-A71B904B8D5C</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>10</dataTypeSize>
+<ownDataTypeParameters>10,,</ownDataTypeParameters>
+</Attribute>
+<Attribute name="bodovi" id="F1DFCA6D-CA5E-29E1-FB63-B2AC43C39CB2">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 18:16:30 UTC</createdTime>
+<generatorID>221CB5F2-5E33-6D25-F40A-A71B904B8D5C</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="true"/>
+</engineerTo>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+</Attribute>
+</attributes>
+<identifiers itemClass="oracle.dbtools.crest.model.design.logical.CandidateKey">
+<identifier id="C7123620-BC61-4A70-6C6A-B9E1863E87DB" name="RANG_LISTA_TIMOVA PK">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-01-15 18:14:17 UTC</createdTime>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<shouldEngineer>false</shouldEngineer>
+<engineerTo>
+<item key="43AAE72E-6405-11EF-F027-6D0C138AC14B" value="false"/>
+</engineerTo>
+<pk>true</pk>
+<usedAttributes>
+<attributeRef>C62A230B-F604-7935-06BF-4507F4F89DF4</attributeRef>
+</usedAttributes>
+</identifier>
+</identifiers>
+</Entity>

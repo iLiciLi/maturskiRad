@@ -1,0 +1,1352 @@
+Maturski rad kod :
+
+Tekst za maturski rad :
+
+Potrebno je napraviti bazu podataka za Košarkašku Ligu Srbije.
+Liga se sastoji iz 16 timova. 
+Svaki tim ima svoj naziv, logotip, adresu, kontakt informacije(telefon, email) i dvoranu u kojoj se igraju utakmice. 
+Jedan tim ima jedan stručni štab koji može imati jednog glavnog trenera, jednog ili više pomoćnih trenera,
+jednog ili više službenih predstavnika, jednog ili više pratilaca, jednog ili više lekara.
+Za trenere (i glavne i pomoćne) se pamte njihove licence, imena i prezimena, a za pratioce, službene predstavnike i lekare id,ime i prezime.
+Kod službenih predstavnika je licenca opciona.
+Jedan tim može imati 5 ili više igrača i igrači mogu igrati za samo jedan tim.
+Svaki igrač ima svoj evidencijski broj, ime, prezime, broj dresa, poziciju koju igra kao i godište i visina.
+Jedan igrač može igrati jednu ili više utakmica tokom sezone kao i što jedna utakmica može biti igrana od strane više igrača.
+Takođe treba voditi i statistiku svakog igrača nakon utakmice koju je odigrao.
+Ona treba obuhvatati broj poena tog igrača kao procenat šuta za 1,2 i 3 poena, takođe pratiti i broj skokova, broj asistencija, broj blokova, broj minuta u igri, broj ukradenih i izgubljenih lopti,...
+Utakmica pamti dvoranu u kojoj je odigrana.
+Jednu utakmicu mogu igrati 2 tima (i tim može igrati više utakmica tokom sezone) i utakmicu mogu suditi jedan ili više sudija.
+Zajednički entitet između tabela Tim i Utakmica pamti id domaćeg i id protivničkog tima kao i rezultat, broj gledalaca,delegat i datum kada je utakmica odigrana.
+Tokom trajanja sezone postoji rang lista na kojoj mogu biti jedan ili više timova.
+Lista prati broj utakmica, pobede/poraze,date koševe/promašene koševe (KD:KP),razliku datih i promašenih koševa (KR) i broj bodova.
+
+
+PRAVLJENJE TABELA :
+
+CREATE TABLE KATEGORIJE_ZAP (
+    id NUMBER(7) PRIMARY KEY,
+    naziv VARCHAR2(255) NOT NULL
+);
+
+CREATE TABLE RANG_LISTA_TIMOVA (
+    id NUMBER(4) PRIMARY KEY,
+    ut NUMBER(4) NOT NULL,
+    p_i VARCHAR2(15) NOT NULL,
+    kd_kp VARCHAR2(15) NOT NULL,
+    kr VARCHAR2(10) NOT NULL,
+    bodovi VARCHAR2(7) NOT NULL
+);
+
+CREATE TABLE DVORANE_UTAKMICA (
+    id VARCHAR2(3) PRIMARY KEY,
+    naziv VARCHAR2(50) NOT NULL
+);
+
+CREATE TABLE SUDIJE (
+    id NUMBER(5) PRIMARY KEY,
+    ime VARCHAR2(20) NOT NULL,
+    prezime VARCHAR2(20) NOT NULL,
+    mesto VARCHAR2(30) NOT NULL,
+    slika VARCHAR2(150) NOT NULL
+);
+
+CREATE TABLE TIMOVI (
+    id NUMBER(2) PRIMARY KEY,
+    naziv VARCHAR2(50) NOT NULL,
+    logo VARCHAR2(150) NOT NULL,
+    adresa VARCHAR2(50) NOT NULL,
+    telefon VARCHAR2(30) NOT NULL,
+    email VARCHAR2(50) NOT NULL,
+    dvorana VARCHAR2(50) NOT NULL,
+    rlt NUMBER(4) REFERENCES RANG_LISTA_TIMOVA(id)
+);
+
+CREATE TABLE IGRACI (
+    eb VARCHAR2(10) PRIMARY KEY,
+    ime VARCHAR2(25) NOT NULL,
+    prezime VARCHAR2(30) NOT NULL,
+    broj_dresa NUMBER(3),
+    godiste NUMBER(4) NOT NULL,
+    visina VARCHAR2(10) NOT NULL,
+    pozicija VARCHAR2(30) NOT NULL,
+    slika VARCHAR2(150) NOT NULL,
+    TIM_ID NUMBER(2) REFERENCES TIMOVI(id)
+);
+
+CREATE TABLE ZAPOSLENI (
+    id VARCHAR2(100) PRIMARY KEY,
+    ime VARCHAR2(12) NOT NULL,
+    prezime VARCHAR2(20) NOT NULL,
+    slika VARCHAR2(150) NOT NULL,
+    TIM_ID NUMBER(2) REFERENCES TIMOVI(id),
+    KAT_ID NUMBER(7) REFERENCES KATEGORIJE_ZAP(id)
+);
+
+CREATE TABLE UTAKMICE (
+    id_domacina NUMBER(2),
+    id_protivnika NUMBER(2),
+    rezultat VARCHAR2(7) NOT NULL,
+    delegat VARCHAR2(30) NOT NULL,
+    broj_gledalaca NUMBER(4) NOT NULL,
+    datum DATE NOT NULL,
+    id_dvorane VARCHAR2(3) REFERENCES DVORANE_UTAKMICA(id),
+    PRIMARY KEY (id_domacina, id_protivnika),
+    CONSTRAINT fk_domacin FOREIGN KEY (id_domacina) REFERENCES TIMOVI(id),
+    CONSTRAINT fk_protivnik FOREIGN KEY (id_protivnika) REFERENCES TIMOVI(id)
+);
+
+CREATE TABLE STAT_I_NA_U (
+    id NUMBER(5),
+    poeni NUMBER(10) NOT NULL,
+    jedanP VARCHAR2(10) NOT NULL,
+    jedanP_procenti VARCHAR2(5) NOT NULL,
+    dvaP VARCHAR2(10) NOT NULL,
+    dvaP_procenti VARCHAR2(5) NOT NULL,
+    triP VARCHAR2(10) NOT NULL,
+    triP_procenti VARCHAR2(5) NOT NULL,
+    skokovi VARCHAR2(15) NOT NULL,
+    lop VARCHAR2(10) NOT NULL,
+    asistencije VARCHAR2(5) NOT NULL,
+    blokovi VARCHAR2(5) NOT NULL,
+    lg VARCHAR2(5) NOT NULL,
+    minuti NUMBER(5) NOT NULL,
+    igrac_id VARCHAR2(10) REFERENCES IGRACI(eb),
+    utakmica_id_domacina NUMBER(2),
+    utakmica_id_protivnika NUMBER(2),
+    PRIMARY KEY (id,igrac_id, utakmica_id_domacina, utakmica_id_protivnika),
+    CONSTRAINT fk_utakmica_domacin FOREIGN KEY (utakmica_id_domacina, utakmica_id_protivnika) REFERENCES UTAKMICE(id_domacina, id_protivnika)
+);
+
+CREATE TABLE SUDIJE_UTAKMICE (
+    id_sudije NUMBER(5),
+    id_utakmice_domacina NUMBER(2),
+    id_utakmice_protivnika NUMBER(2),
+    PRIMARY KEY (id_utakmice_domacina, id_utakmice_protivnika, id_sudije),
+    CONSTRAINT fk_utakmica FOREIGN KEY (id_utakmice_domacina, id_utakmice_protivnika) REFERENCES UTAKMICE(id_domacina, id_protivnika),
+    CONSTRAINT fk_sudija FOREIGN KEY (id_sudije) REFERENCES SUDIJE(id)
+);
+
+NAKON OVOGA SAM KUCAO OVO :
+
+ALTER TABLE STAT_I_NA_U DROP CONSTRAINT fk_utakmica_domacin;
+ALTER TABLE SUDIJE_UTAKMICE DROP CONSTRAINT fk_utakmica;
+ALTER TABLE STAT_I_NA_U DROP COLUMN utakmica_id_protivnika;
+ALTER TABLE SUDIJE_UTAKMICE DROP COLUMN id_utakmice_protivnika;
+ALTER TABLE STAT_I_NA_U DROP PRIMARY KEY;
+ALTER TABLE STAT_I_NA_U ADD PRIMARY KEY (id,igrac_id, utakmica_id_domacina);
+ALTER TABLE SUDIJE_UTAKMICE DROP PRIMARY KEY;
+ALTER TABLE SUDIJE_UTAKMICE ADD PRIMARY KEY (id_utakmice_domacina, id_sudije);
+ALTER TABLE STAT_I_NA_U
+    ADD CONSTRAINT fk_utakmica_domacin FOREIGN KEY (utakmica_id_domacina) REFERENCES UTAKMICE(id_domacina);
+ALTER TABLE SUDIJE_UTAKMICE
+    ADD CONSTRAINT fk_utakmica FOREIGN KEY (id_utakmice_domacina) REFERENCES UTAKMICE(id_domacina);
+
+KADA JE JAVIO GREŠKE ONDA SAM SAMO IŠAO I URADIO DROP COLUMN ZA ID_PROTIVNIKA U SUDIJE_UTAKMICE i u STAT_I_NA_U.
+---
+UNOŠENJE PODATAKA :
+
+~KATEGORIJE_ZAP~
+
+INSERT INTO KATEGORIJE_ZAP VALUES(11111,'glavni trener');
+INSERT INTO KATEGORIJE_ZAP VALUES(22222,'pomoćni trener');
+INSERT INTO KATEGORIJE_ZAP VALUES(33333,'pratilac');
+INSERT INTO KATEGORIJE_ZAP VALUES(44444,'službeni predstavnik');
+INSERT INTO KATEGORIJE_ZAP VALUES(55555,'lekar');
+
+~RANG_LISTA_TIMOVA~
+INSERT INTO RANG_LISTA_TIMOVA VALUES(1, 21, '17/4', '1781:1624', '+157', '38');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(2, 21, '16/5', '1818:1580', '+238', '37');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(3, 21, '16/5', '1866:1730', '+136', '37');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(4, 21, '15/6', '1846:1781', '+65', '36');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(5, 21, '12/9', '1815:1746', '+69', '33');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(6, 21, '12/9', '1797:1771', '+26', '33');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(7, 21, '11/10', '1674:1603', '+71', '32');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(8, 21, '11/10', '1668:1690', '-22', '32');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(9, 21, '10/11', '1778:1837', '-59', '31');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(10, 21, '9/12', '1677:1686', '-9', '30');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(11, 21, '9/12', '1835:1903', '-68', '30');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(12, 21, '7/14', '1705:1741', '-36', '28');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(13, 21, '7/14', '1659:1767', '-108', '28');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(14, 21, '6/15', '1734:1808', '-74', '27');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(15, 21, '6/15', '1699:1865', '-166', '27');
+INSERT INTO RANG_LISTA_TIMOVA VALUES(16, 21, '4/17', '1714:1934', '-220', '25');
+
+~DVORANE_UTAKMICA~
+INSERT INTO DVORANE_UTAKMICA VALUES ('800', 'Sportska hala Čajetina');
+INSERT INTO DVORANE_UTAKMICA VALUES ('801', 'SC Mladost kraj Morave');
+INSERT INTO DVORANE_UTAKMICA VALUES ('802', 'Hala sportova Dudova šuma');
+INSERT INTO DVORANE_UTAKMICA VALUES ('803', 'SPC Vojvodina');
+INSERT INTO DVORANE_UTAKMICA VALUES ('804', 'SPC Vojvodina');
+INSERT INTO DVORANE_UTAKMICA VALUES ('805', 'SC Dynamic');
+INSERT INTO DVORANE_UTAKMICA VALUES ('806', 'Hala sportova „15. Septembar“');
+INSERT INTO DVORANE_UTAKMICA VALUES ('807', 'Doguš Sport Akademy');
+INSERT INTO DVORANE_UTAKMICA VALUES ('808', 'Hala Mega Factory');
+INSERT INTO DVORANE_UTAKMICA VALUES ('809', 'SRC Dubočica');
+INSERT INTO DVORANE_UTAKMICA VALUES ('810', 'SC Dynamic');
+INSERT INTO DVORANE_UTAKMICA VALUES ('811', 'Hala Jezero');
+INSERT INTO DVORANE_UTAKMICA VALUES ('812', 'Hala sportova Strelište');
+INSERT INTO DVORANE_UTAKMICA VALUES ('813', 'Veliki park bb 31000 Užice');
+INSERT INTO DVORANE_UTAKMICA VALUES ('814', 'Centar Millennium');
+INSERT INTO DVORANE_UTAKMICA VALUES ('815', 'Nova hala sportova');
+INSERT INTO DVORANE_UTAKMICA VALUES ('816', 'Sportski centar Master');
+INSERT INTO DVORANE_UTAKMICA VALUES ('817', 'Mostonga');
+INSERT INTO DVORANE_UTAKMICA VALUES ('818', 'Nova hala sportova');
+INSERT INTO DVORANE_UTAKMICA VALUES ('819', 'Hala sportova Dudova šuma');
+INSERT INTO DVORANE_UTAKMICA VALUES ('820', 'SC Mladost kraj Morave');
+INSERT INTO DVORANE_UTAKMICA VALUES ('821', 'SC Dynamic');
+INSERT INTO DVORANE_UTAKMICA VALUES ('822', 'Veliki park bb 31000 Užice');
+INSERT INTO DVORANE_UTAKMICA VALUES ('823', 'SRC Dubočica');
+INSERT INTO DVORANE_UTAKMICA VALUES ('824', 'Doguš Sport Akademy');
+INSERT INTO DVORANE_UTAKMICA VALUES ('825', 'Nova hala sportova');
+INSERT INTO DVORANE_UTAKMICA VALUES ('826', 'SRC Dubočica');
+INSERT INTO DVORANE_UTAKMICA VALUES ('827', 'Hala sportova „15. Septembar“');
+INSERT INTO DVORANE_UTAKMICA VALUES ('828', 'Hala Jezero');
+INSERT INTO DVORANE_UTAKMICA VALUES ('829', 'SC Mladost kraj Morave');
+INSERT INTO DVORANE_UTAKMICA VALUES ('830', 'Mostonga');
+INSERT INTO DVORANE_UTAKMICA VALUES ('831', 'Hala Mega Factory');
+
+~SUDIJE~
+INSERT INTO SUDIJE VALUES(1111,'Radoš','Arsenijević','Beograd','https://kls.rs/wp-content/uploads/2023/09/arsenijevic_rados_sudija_kls-1-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1112, 'Ilija', 'Belošević', 'Beograd', 'https://kls.rs/wp-content/uploads/2022/09/belosevic_ilija_-sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1113, 'Đorđe', 'Bogojević', 'Kraljevo', 'https://kls.rs/wp-content/uploads/2023/09/bogojevic_djordje_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1114, 'Vladimir', 'Vesković', 'Beograd', 'https://kls.rs/wp-content/uploads/2024/01/veskovic_vladimir_2024-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1115, 'Nemanja', 'Vlahović', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/vlahovic_nemanja_sudija-kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1116, 'Mladen', 'Vuletin', 'Vršac', 'https://kls.rs/wp-content/uploads/2023/09/vuletin_mladen_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1117, 'Strahinja', 'Dašić', 'Kraljevo', 'https://kls.rs/wp-content/uploads/2023/09/dasic_strahinja_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1118, 'Vojkan', 'Živković', 'Čačak', 'https://kls.rs/wp-content/uploads/2023/09/zivkovic_vojkan_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1119, 'Stefan', 'Zdravković', 'Niš', 'https://kls.rs/wp-content/uploads/2023/09/zdravkovic_stefan_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1120, 'Ivan', 'Ilić', 'Niš', 'https://kls.rs/wp-content/uploads/2023/09/ilic_ivan_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1121, 'Vladimir', 'Jevtović', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/jevtovic_vladimir_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1122, 'Milivoje', 'Jovčić', 'Beograd', 'https://kls.rs/wp-content/uploads/2022/09/jovcic_milivoje_sudija_klsa-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1123, 'Marko', 'Juras', 'Beograd', 'https://kls.rs/wp-content/uploads/2022/09/juras_marko_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1124, 'Dragan', 'Matić', 'Kragujevac', 'https://kls.rs/wp-content/uploads/2022/09/matic_dragan_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1125, 'Ljubomir', 'Marković', 'Čačak', 'https://kls.rs/wp-content/uploads/2023/09/markovic_ljubomir_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1126, 'Aleksandar', 'Milojević', 'Kruševac', 'https://kls.rs/wp-content/uploads/2023/09/milojevic_aleksandar_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1127, 'Nikola', 'Miloradović', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/miloradovic_nikola_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1128, 'Uroš', 'Nikolić', 'Beograd', 'https://kls.rs/wp-content/uploads/2022/09/nikolic_uros_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1129, 'Nemanja', 'Ninković', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/ninkovic_nemanja_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1130, 'Uroš', 'Obrknežević', 'Beograd', 'https://kls.rs/wp-content/uploads/2022/09/oberknezevic_uros_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1131, 'Vladimir', 'Tomić', 'Novi Sad', 'https://kls.rs/wp-content/uploads/2023/09/vladimir_tomic_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1132, 'Petar', 'Pešić', 'Leskovac', 'https://kls.rs/wp-content/uploads/2023/09/pesic_petar_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1133, 'Siniša', 'Prpa', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/prpa_sinisa_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1134, 'Danilo', 'Petković', 'Šabac', 'https://kls.rs/wp-content/uploads/2023/09/petkovic_danilo_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1135, 'Milan', 'Sibinović', 'Niš', 'https://kls.rs/wp-content/uploads/2023/09/sibinovic_milan_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1136, 'Marko', 'Simić', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/sibinovic_marko_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1137, 'Jelena', 'Smiljanić', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/smiljanic_jelena_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1138, 'Ivan', 'Stefanović', 'Kraljevo', 'https://kls.rs/wp-content/uploads/2023/09/stefanovic_ivan_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1139, 'Marko', 'Strika', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/strika_marko_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1140, 'Duško', 'Sedlar', 'Novi Sad', 'https://kls.rs/wp-content/uploads/2023/09/sedlar_dusko_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1141, 'Stefan', 'Ćalić', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/calic_stefan_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1142, 'Miloš', 'Hadžić', 'Stara Pazova', 'https://kls.rs/wp-content/uploads/2023/09/hadzic_milos_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1143, 'Pavle', 'Šipka', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/sipka_pavle_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1144, 'Stevan', 'Krstić', 'Aleksinac', 'https://kls.rs/wp-content/uploads/2023/09/krstic_stevan-sudija_kls-1-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1145, 'Dušan', 'Marčetić', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/marcetic_dusan_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1146, 'Žarko', 'Stanković', 'Niš', 'https://kls.rs/wp-content/uploads/2023/09/stankovic_zarko_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1147, 'Luka', 'Manojlović', 'Užice', 'https://kls.rs/wp-content/uploads/2023/09/manojlovic_luka-sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1148, 'Miloš', 'Vujović', 'Kraljevo', 'https://kls.rs/wp-content/uploads/2023/09/vujovic_milos_sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1149, 'Slavko', 'Rakić', 'Novi Sad', 'https://kls.rs/wp-content/uploads/2023/09/rakic-slavko-sudija_kls-200x200.jpg');
+INSERT INTO SUDIJE VALUES (1150, 'Nemanja', 'Krivokuća', 'Beograd', 'https://kls.rs/wp-content/uploads/2023/09/krivokuca_nemanja_sudija_kls-200x200.jpg');
+
+
+~TIMOVI~
+INSERT INTO TIMOVI VALUES(20, 'Zlatibor Gold Gondola', 'https://kls.rs/wp-content/uploads/2021/11/kk_zlatibor_grb-400x400.jpg', 'Kralja Aleksandra Karađorđevića', '031/832-104', 'kkzlatibor@gmail.com', 'Sportska hala Čajetina', 4);
+INSERT INTO TIMOVI VALUES(21, 'Spartak Office Shoes', 'https://kls.rs/wp-content/uploads/2022/09/mkk_spartak_office_shoes_logo-400x427.jpg', 'Dimitrija Tucovića br.2', '024 4101770', 'info@kkspartak.rs', 'Hala sportova Dudova šuma', 2);
+INSERT INTO TIMOVI VALUES(22, 'Vojvodina mts', 'https://kls.rs/wp-content/uploads/2022/09/kk_vojvodina_novi_logo-400x400.jpg', 'Sutjeska 2', '064 306 2335', 'office@kkvojvodina.rs', 'SPC Vojvodina', 1);
+INSERT INTO TIMOVI VALUES(23, 'Metalac', 'https://kls.rs/wp-content/uploads/2021/11/kk_metalac_grb-400x400.jpg', 'Karađorđeva 43', '014 220 468', 'kkmetalac@mts.rs', 'Hala sportova „15. Septembar“', 9);
+INSERT INTO TIMOVI VALUES(24, 'Beograd', 'https://kls.rs/wp-content/uploads/2021/10/grb_okk_beograd-400x400.jpg', 'Zdravka Čelara 12', '064 11 33 294', 'office@okkbeograd.org.rs', 'Hala Mega Factory', 11);
+INSERT INTO TIMOVI VALUES(25, 'Dynamic Balkan Bet', 'https://kls.rs/wp-content/uploads/2021/11/kk_dynamic_grb-400x400.jpg', 'Dunavska 62', '011 40 444 55', 'office@kkdynamic.rs', 'SC Dynamic', 10);
+INSERT INTO TIMOVI VALUES(26, 'Tamiš', 'https://kls.rs/wp-content/uploads/2021/11/kk_tamis_grb-400x400.jpg', 'Vojvode Radomira Putnika 15', '064 6126 444', 'kktamis@yahoo.com', 'Hala sportova Strelište', 13);
+INSERT INTO TIMOVI VALUES(27, 'Vršac doo', 'https://kls.rs/wp-content/uploads/2021/11/kk_vrsac_grb-400x400.jpg', 'Omladinski trg 17', '+381 61 1419802', 'office@kkvrsac.rs', 'Centar Millennium', 3);
+INSERT INTO TIMOVI VALUES(28, 'Mladost MaxBet', 'https://kls.rs/wp-content/uploads/2021/11/kk_mladost_grb-400x400.jpg', 'Mića Radakovića 4u', '011 307 6112', 'kkmladost1954@gmail.com', 'Sportski centar Master', 12);
+INSERT INTO TIMOVI VALUES(29, 'Sloga', 'https://kls.rs/wp-content/uploads/2021/11/grb_kk_sloga-400x400.jpg', '4. kraljevački bataljon 21', '036 200 503', 'kksloga@sbb.rs', 'Nova hala sportova', 14);
+INSERT INTO TIMOVI VALUES(30, 'Čačak 94 Quantox', 'https://kls.rs/wp-content/uploads/2022/08/Cacak94_logo.png', 'Prvi Oktobar 33 La', '064 2723365', 'kkcacak94@gmail.com', 'SC Mladost kraj Morave', 7);
+INSERT INTO TIMOVI VALUES(31, 'Sloboda', 'https://kls.rs/wp-content/uploads/2021/11/kk_sloboda_grb-400x400.jpg', 'Omladinska bb 31000 Užice', '031 352 7102', 'kkslobodauzice@gmail.com', 'Veliki park bb 31000 Užice', 5);
+INSERT INTO TIMOVI VALUES(32, 'Novi Pazar', 'https://kls.rs/wp-content/uploads/2021/11/okk_novi_pazar_grb-400x400.jpg', 'Mitrovačka bb 36300 Novi Pazar', '+381 640869939', 'okknovipazar2018@gmail.com', 'Doguš Sport Akademy', 15);
+INSERT INTO TIMOVI VALUES(33, 'Zdravlje Leskovac', 'https://kls.rs/wp-content/uploads/2021/11/grb_kk_zdravlje-400x400.jpg', 'Pana Đukića 18', '065 210 7035', 'kkzdravljeleskovac@gmail.com', 'SRC Dubočica', 16);
+INSERT INTO TIMOVI VALUES(34, 'SPD Radnički', 'https://kls.rs/wp-content/uploads/2021/11/spd_radnicki_logo-400x400.jpg', 'Grada Sirena 15', '034 331 958', 'kosarka@spdradnickikragujevac.com', 'Hala Jezero', 8);
+INSERT INTO TIMOVI VALUES(35, 'Joker', 'https://kls.rs/wp-content/uploads/2023/09/logo-zuti-400x400.png', 'Venac Radomira Putnika 1', '+381 631078963', 'jokersombor@gmail.com', 'Mostonga', 6);
+
+~IGRACI~
+INSERT INTO IGRACI VALUES(0000119041, 'Adi', 'Zahiragić', 1, 1995, '187cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/12/adi_zahiragic_kk_zlatibor_gold_gondola-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0000222005, 'Lazar', 'Milošević', 3, 2004, '207cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/3_lazar_milosevic_centar_ebi_0000222005-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0439811001, 'Miloš', 'Glišić', 7, 1998, '206cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2024/01/glisic_milos-kk_zlatibor_gold_gondola-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0000123074, 'Liutych', 'Vitali', 9, 1992, '199cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/9_vitali_liutych_small-forward_ebi_0000123074-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0455603071, 'Brano', 'Đukanović', 10, 1995, '196cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/10_brano_djukanovic_shooting-guard_ebi_0455603071-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0503208011, 'Dimitrije', 'Nikolić', 11, 1997, '211cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/11_dimitrije_nikolic_centar_ebi_0503208011-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0438314016, 'Andrija', 'Matović', 13, 2003, '199cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/13_andrija_matovic_power-forward_ebi_0438314016-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0400901198, 'Ivan', 'Smiljanić', 16, 1989, '199cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/16_ivan_smiljanic_power-forward_ebi_0400901198-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0000123039, 'Jure', 'Špan', 17, 1995, '193cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/17_jure_span_point-guard_ebi_0000123039-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0407710017, 'Viktor', 'Kovačević', 25, 1999, '200cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/25_viktor_kovacevic_power-forward_ebi_0407710017-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0000123040, 'Jan', 'Rebec', 31, 1993, '192cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/31_jan_rebec_shooting-guard_ebi_0000123040-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0606405008, 'Boško', 'Čorbić', 33, 1995, '191cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/33_bosko_corbic_shooting-guard_ebi_0606405008-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0140515018, 'Dušan', 'Stojičić', 34, 2001, '205cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/04/dusan_stojicic_zlatibor_gold_gondola-400x400.jpg', 20);
+INSERT INTO IGRACI VALUES(0169215043, 'Mihajlo', 'Olujić', 1, 2006, '197cm', 'Plejmejker/Bek', 'https://kls.rs/wp-content/uploads/2023/09/01_mihajlo_olujic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0106417005, 'Pavle', 'Steljić', 2, 2007, '189cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/02_pavle_steljic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0602210016, 'Luka', 'Cerovina', 3, 2000, '201cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/12/03-luka-cerovina-kls-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0455603014, 'Aleksandar', 'Cvetković', 4, 1993, '188cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/04_aleksandar_cvetkovic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0404712007, 'Ilija', 'Milijašević', 5, 2004, '189cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/05_ilija_milijasevic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0734613005, 'Pavle', 'Stepanović', 7, 2002, '207cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/07_pavle_stepanovic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0606402515, 'Dušan', 'Kutlešić', 8, 1994, '199cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/08_dusan_kutlesic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0107203013, 'Miloš', 'Milisavljević', 9, 1993, '191cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/09_milos_milisavljevic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0000222008, 'Aleksandar', 'Topčov', 10, 2006, '198cm', 'Plejmejker/Bek', 'https://kls.rs/wp-content/uploads/2023/09/10_aleksandar_topcov-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0459410015, 'Dušan', 'Radosavljević', 11, 2001, '203cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/11_dusan_radosavljevic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0235115001, 'Vojin', 'Medarević', 13, 2002, '206cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/13_vojin_medarevic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0400121001, 'Jovan', 'Vuković', 14, 2007, '211cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/14_jovan_vukovic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0649203033, 'Marko', 'Tejić', 15, 1995, '210cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/15_marko_tejic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0465403022, 'Andrija', 'Bojić', 16, 1993, '205cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/16_andrija_bojic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0107516010, 'Miroslav', 'Bogdanović', 17, 2006, '195cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/17_miroslav_bogdanovic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0000216002, 'Aleksandar', 'Lazić', 21, 1996, '203cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2024/01/21_aleksandar_lazic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0000205007, 'Nemanja', 'Gordić', 22, 1988, '193cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2024/01/22_nemanja_gordic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0224403015, 'Aleksandar', 'Sokolović', 33, 1993, '193cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/33_aleksandar_sokolovic-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0203115043, 'Vladimir', 'Popović', 44, 2006, '200cm', 'Bek/Krilo', 'https://kls.rs/wp-content/uploads/2023/12/popovic_vladimir_spartak_office_shoes_kls-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0105010012, 'Filip', 'Barna', 88, 1999, '201cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/88_filip_barna-400x400.jpg', 21);
+INSERT INTO IGRACI VALUES(0000123096, 'Jared', 'Armon Cunningham', 1, 1991, '195cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/11/1-jared-armon-cunningham-kk-vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0160810011, 'Uroš', 'Banjac', 2, 2001, '197cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/2_uros_banjac_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0140515005, 'Aleksandar', 'Vojinović', 3, 2006, '#cm', 'Bek', 'https://kls.rs/wp-content/uploads/2024/01/vojinovic_aleksandar_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0264706004, 'Luka', 'Nedeljkov', 4, 1997, '189cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/10/4_luka_nedeljkov_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0140798005, 'Marko', 'Ljubičić', 5, 1987, '194cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/10/5_marko_ljjubicic_kapiten_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0800505002, 'Petar', 'Rakićević', 7, 1995, '203cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/petar_rakicevic_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0301617004, 'Bogdan', 'Zagrađanin', 8, 2004, '201cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/bogdan_zagradjanin_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0410716004, 'Rade', 'Zečević', 9, 2005, '196cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/rade_zecevic_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0103614039, 'Boško', 'Bumbić', 10, 2001, '193cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/10/bosko_umbic_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0141116022, 'Dimitrije', 'Kondić', 11, 2006, '#cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2024/01/kondic_dimitrije_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0104315018, 'Nikola', 'Ušljebrka', 12, 2006, '#cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2024/01/usljebrka_nikola_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0601908007, 'Stefan', 'Savić', 13, 1995, '199cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/10/stefan_savic_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0000118074, 'Zoran', 'Nikolić', 19, 1996, '213cm', 'Centar', 'https://kls.rs/wp-content/uploads/2024/01/nikolic-zoran-kk-vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0000218001, 'Luka', 'Ašćerić', 25, 1997, '201cm', 'Bek', 'https://kls.rs/wp-content/uploads/2024/01/asceric_luka_kk_vojvodina_mts-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0101815002, 'Luka', 'Savanović', 22, 2005, '198cm', 'Bek', 'https://kls.rs/wp-content/uploads/2024/01/savanovic-luka-vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0000123050, 'Tyrell', 'Reese Johnson', 32, 1997, '203cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/10/johnson_tyrell_reese_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0112504021, 'Vasilije', 'Vučetić', 33, 1996, '208cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/10/vasilije_vucetic_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES(0103614030, 'Marko', 'Vučković', 50, 2005, '205cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/marko_vuckovic_kk_vojvodina-400x400.jpg', 22);
+INSERT INTO IGRACI VALUES (0603415008, 'Marko', 'Bajić', 1, 2001, '191 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/1_marko_bajic_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0000122018, 'Terry Lee', 'Armstrong II', 2, 2000, '200 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/11/2_terry_lee_armstrong_kk_metalac-1.jpg', 23);
+INSERT INTO IGRACI VALUES (0400100233, 'Stefan', 'Sinovec', 5, 1988, '195 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/5_stefan-sinovec_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0432801064, 'Filip', 'Đuran', 7, 1991, '198 cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/7_filip_djuran_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0165704003, 'Miloš', 'Grubor', 9, 1991, '201 cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/10/9_milos_grubor_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0000123078, 'Junwei', 'Xu', 12, 2004, '204 cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/10/12_xu_junweu_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0302416008, 'Aleksej', 'Obućina', 14, 2007, '201 cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/14_aleksej_obucina_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0000123055, 'Kenny Martel', 'Mathews Dye', 15, 2000, '182 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/15_dye_kenny_martel_mathews_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0401507003, 'Aleksa', 'Popović', 16, 1999, '205 cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/16_aleksa_popovic_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0603418015, 'Aleksandar', 'Milićević', 17, 2007, '182 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/17_aleksandar_milicevic_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0302418006, 'Vojin', 'Obradović', 19, 2006, '200 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/19_vojin_obradovic_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0603418003, 'Đorđe', 'Gnjato', 21, 2008, '198 cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/21_djordje_gnjato_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0545100103, 'Sava', 'Lešić', 25, 1988, '205 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/25_sava_lesic_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0603417007, 'Nemanja', 'Janković', 26, 2002, '178 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/26_nemanja_jankovic_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0302411008, 'Aleksandar', 'Teofilović', 44, 2000, '180 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/44_aleksandar_teofilovic_kk_metalac.jpg', 23);
+INSERT INTO IGRACI VALUES (0406515004, 'Aleksa', 'Milenković', 0, 2004, '201cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/10/0_milenkovic_aleksa_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0439810018, 'Lazar', 'Nekić', 1, 1999, '213cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/10/1_nekic_lazar_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0630216053, 'Bogoljub', 'Marković', 6, 2005, '210cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/10/6_markovic_bogoljub_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0402617004, 'Marko', 'Vukčević', 7, 2003, '207cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/10/7_vukcevic_marko_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0000122082, 'Urban', 'Kroflič', 8, 2006, '198cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/8_kroflic_urban_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0431814019, 'Andrej', 'Paunović', 9, 2004, '195cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/10/9_paunovic_andrej_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0438314009, 'Kosta', 'Dragojević', 11, 2004, '195cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/11_dragojevic_kosta_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0000222017, 'Marko', 'Živković', 17, 2004, '203cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/10/17_zivkovic_marko_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0411210004, 'Milan', 'Pavlović', 19, 1998, '213cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/10/19_pavlovic_milan_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0302814003, 'Asim', 'Đulović', 20, 2005, '205cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/20_djulovic_asim_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0401506024, 'Aleksandar', 'Pantelić', 22, 1998, '198cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/22_pantelic_aleksandar_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0413015001, 'Filip', 'Radaković', 33, 2004, '200cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2024/01/radakovic_filip_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0411816004, 'Lazar', 'Gačić', 35, 2005, '210cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/10/35_gacic_lazar_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0348014035, 'Andrej', 'Mušicki', 70, 2005, '189cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/10/70_musicki_andrej_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0800511021, 'Mihajlo', 'Petrović', 77, 2003, '188cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/10/77_petrovic_mihajlo_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0405017019, 'Uroš', 'Ćurguz', 66, 2006, '190cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/curguz_uros_okk_beograd-400x400.jpg', 24);
+INSERT INTO IGRACI VALUES (0410917051, 'Barišić', 'Luka', 99, 2006, '195 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/10/barisic_luka_okk_beograd.jpg', 24);
+INSERT INTO IGRACI VALUES (0405018031, 'Živadinović', 'Nikola', 88, 2004, '204 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/10/zivadinovic_nikola_okk_beograd.jpg', 24);
+INSERT INTO IGRACI VALUES (0000123101, 'Linjun', 'Jiang', 2, 2005, '# cm', 'Bek', 'https://kls.rs/wp-content/uploads/2024/01/fin.jpg', 24);
+INSERT INTO IGRACI VALUES (0734615039, 'Aleksa', 'Ristić', 1, 2005, '192 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/1_ristic_aleksa_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0405015048, 'Ognjen', 'Romić', 2, 2005, '204 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/2_romic_ognjen_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0432815005, 'Ognjen', 'Radošić', 3, 2006, '191 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/3_radosic_ognjen_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0513703024, 'Nikola', 'Kostić', 4, 1993, '202 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/11/4_kostic_nikola_dynamic_balkan_bet.jpg', 25);
+INSERT INTO IGRACI VALUES (0107117025, 'Kosta', 'Trifunović', 6, 2006, '192 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/trifunovic-kosta-kk-dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0405711034, 'Uroš', 'Paunović', 7, 2003, '189 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/7_punovic_uros_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0000123073, 'George', 'Blagojević', 8, 1996, '202 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/8_blagojevic_george_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0103311004, 'Stefan', 'Agoč', 9, 2002, '201 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/9_agoc_stefan_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0452805009, 'Nenad', 'Nerandžić', 10, 1996, '203 cm', 'Krilo / Krilni centar', 'https://kls.rs/wp-content/uploads/2023/12/10_nerandzic_nenad_kk_dynamic_balkan_bet.jpg', 25);
+INSERT INTO IGRACI VALUES (0750315107, 'Ilija', 'Petrović', 11, 2005, '197 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/11_petrovic_ilija_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0469908017, 'Jovan', 'Šljivančanin', 13, 1999, '196 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/11/sljivancanin_jovan_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0415215001, 'Janko', 'Dukić', 14, 2006, '197 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/dukic_janko_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0431898038, 'Nenad', 'Šulović', 17, 1985, '202 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/17_sulovic_nenad_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0103614022, 'Filip', 'Malešević', 19, 2005, '220 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/19_malesevic_filip_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0606412001, 'Lazar', 'Joksimović', 21, 2002, '204 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/21_joksimovic_lazar_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0000123032, 'Jarred', 'Penn Eral', 23, 1998, '201 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/23_penn_eral_jarredPenn-Eral-Jarred.jpg', 25);
+INSERT INTO IGRACI VALUES (0642500060, 'Aleksandar', 'Ponjavić', 24, 1991, '200 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/24_ponjavic_aleksandar_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0000122009, 'Bogdan', 'Shkarban', 88, 2006, '190 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/10/shkarban_bogdan_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0416118003, 'Aleksa', 'Vlajić', NULL, 2006, '208 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/vlajic_aleksa_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0600615001, 'Matija', 'Prodanović', NULL, 2006, '202 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/prodanovic_matija_kk_dynamic.jpg', 25);
+INSERT INTO IGRACI VALUES (0000123081, 'Jaylen Robert', 'Andrews', 0, 2000, '190 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/0_jaylen_robert_andrews.jpg', 26);
+INSERT INTO IGRACI VALUES (0155515006, 'Strahinja', 'Ćurčić', 2, 2003, '193 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/2_strahinja_curcic_kk_tamis-1.jpeg', 26);
+INSERT INTO IGRACI VALUES (0606904001, 'Stefan', 'Mitrović', 5, 1994, '190 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/5_stefan_mitrovic_kk_tamis-1.jpeg', 26);
+INSERT INTO IGRACI VALUES (0734514007, 'Marko', 'Krstić', 7, 2004, '199 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/7_marko_krstic_kk_tamis-1.jpeg', 26);
+INSERT INTO IGRACI VALUES (0315014010, 'Marko', 'Mihailović', 8, 2003, '195 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/8_marko_mihailovic_kk_tamis-1.jpeg', 26);
+INSERT INTO IGRACI VALUES (0401506016, 'Branislav', 'Terzić', 9, 1997, '196 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/9_branislav_terzic_kk_Tamis-1.jpeg', 26);
+INSERT INTO IGRACI VALUES (0728307011, 'Đorđe', 'Rakočević', 10, 1998, '188 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/10_djordje_rakocevic_kk_tamis-1.jpeg', 26);
+INSERT INTO IGRACI VALUES (0601801133, 'Slaven', 'Čupković', 12, 1988, '206 cm', 'Krilni centar / Centar', 'https://kls.rs/wp-content/uploads/2023/12/cupkovic_slaven_kk_tamis.jpg', 26);
+INSERT INTO IGRACI VALUES (0348012007, 'Aleksa', 'Kojadinović', 13, 1998, '206 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/13_aleksa_kojadinovic__tamis.jpeg', 26);
+INSERT INTO IGRACI VALUES (0000122039, 'Omar', 'Pajić', 23, 1999, '206 cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/23_omar_pajic_kk_tamis-1.jpeg', 26);
+INSERT INTO IGRACI VALUES (0000123054, 'Dante', 'Treacy', 24, 2000, '183 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/24_dante_treacy_kk_tamis-1.jpeg', 26);
+INSERT INTO IGRACI VALUES (0000220012, 'Marko', 'Grković', 25, 1997, '201 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/25_marko_grkovic_kk_tamiss.jpeg', 26);
+INSERT INTO IGRACI VALUES (0642804001, 'Bojan', 'Stanojević', 51, 1988, '207 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/51_bojan_stanojevic_kk_tamis.jpeg', 26);
+INSERT INTO IGRACI VALUES (0222717006, 'Mihailo', 'Dišić', 3, 2006, '193 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.54-1.jpeg', 27);
+INSERT INTO IGRACI VALUES (0642410002, 'Stefan', 'Simić', 4, 1996, '193 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.51.jpeg', 27);
+INSERT INTO IGRACI VALUES (0407105024, 'Nemanja', 'Đorđević', 5, 1995, '203 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.49.jpeg', 27);
+INSERT INTO IGRACI VALUES (0469911017, 'Stefan', 'Stefanović', 6, 2003, '190 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.47-1-400x400.jpeg', 27);
+INSERT INTO IGRACI VALUES (0413311018, 'Luka', 'Šebrek', 7, 2000, '201 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.50-400x400.jpeg', 27);
+INSERT INTO IGRACI VALUES (0469905024, 'Slobodan', 'Jovanović', 8, 1997, '193 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.47-400x400.jpeg', 27);
+INSERT INTO IGRACI VALUES (0000123043, 'Nelson Lamar', 'Philips', 10, 1998, '196 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/Nelson-Lamar-Phillips-Jr-400x400.jpeg', 27);
+INSERT INTO IGRACI VALUES (0513209015, 'Stevan', 'Jovanović', 12, 2001, '205 cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.50-1-400x400.jpeg', 27);
+INSERT INTO IGRACI VALUES (0202819002, 'Nikola', 'Nedeljković', 14, 2008, '193 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.48-1-400x400.jpeg', 27);
+INSERT INTO IGRACI VALUES (0503208003, 'Mihailo','Jovičić',18, 1999, '190 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/12/jovicic_mihailo_kk_vrsac-400x400.jpg', 27);
+INSERT INTO IGRACI VALUES (0000220006, 'Andrija', 'Vuković', 19, 2005, '207 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/12/vukovic_andrija_kk_vrsac_doo-400x400.jpg', 27);
+INSERT INTO IGRACI VALUES (0000123076, 'Nelson Ellis', 'Haskin', 20, 1999, '202 cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.54-400x400.jpeg', 27);
+INSERT INTO IGRACI VALUES (0455604092, 'Bratislav', 'Jeković', 31, 1996, '200 cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.53-400x400.jpeg', 27);
+INSERT INTO IGRACI VALUES (0201510012, 'Mateja', 'Majstorović', 67, 2003, '193 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/WhatsApp-Image-2023-09-29-at-12.10.52-400x400.jpeg', 27);
+INSERT INTO IGRACI VALUES (0706110026, 'Radonja', 'Radonjić', 1, 2001, '197 cm', 'Bek/Krilo', 'https://kls.rs/wp-content/uploads/2023/09/01_radonja_radonjic_kk_mladost_maxbet.jpg', 28);
+INSERT INTO IGRACI VALUES (0433914003, 'Petar', 'Živojinović', 2, 2002, '205 cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/02_petar_zivojinovic_kk_mladost_maxbet.jpg', 28);
+INSERT INTO IGRACI VALUES (0000116029, 'Srđan', 'Tešić', 5, 2002, '202 cm', 'Krilo Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/05_srdjan_tesic_kk_mladost_maxbet.jpg', 28);
+INSERT INTO IGRACI VALUES (0405709003, 'Vuk', 'Vulikić', 7, 1999, '196 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/07_vuk_vulikic_kk_mladost_maxbet.jpg', 28);
+INSERT INTO IGRACI VALUES (0315215001, 'Luka', 'Vudragović', 8, 2004, '197 cm', 'Bek / Krilo', 'https://kls.rs/wp-content/uploads/2023/11/vudragovic_luka_kk_mladost_max_bet.jpg', 28);
+INSERT INTO IGRACI VALUES (0828110012, 'Marko', 'Milenković', 9, 1999, '200 cm', 'Bek / Krilo', 'https://kls.rs/wp-content/uploads/2023/09/09_marko_milenkovic_kk_mladost_maxbet.jpg', 28);
+INSERT INTO IGRACI VALUES (0408709012, 'Lazar', 'Vasić', 10, 2001, '194 cm', 'Plejmejker / Bek', 'https://kls.rs/wp-content/uploads/2023/09/10_lazar_vasic_kk_mladost_maxbet.jpg', 28);
+INSERT INTO IGRACI VALUES (0223708009, 'Luka', 'Gašić', 11, 1998, '196 cm', 'Bek/Krilo', 'https://kls.rs/wp-content/uploads/2023/09/11_luka_gasic_kk_mladost_maxbet.jpg', 28);
+INSERT INTO IGRACI VALUES (0604816013, 'Čedomir', 'Matić', 12, 2003, '206 cm', 'Krilni centar /Centar', 'https://kls.rs/wp-content/uploads/2023/09/12_matic_cedomir_kk_mladost_maxbet.jpg', 28);
+INSERT INTO IGRACI VALUES (0557113015, 'Andrija', 'Radojević', 13, 2004, '205 cm', 'Krilni centar/ Centar', 'https://kls.rs/wp-content/uploads/2023/09/13_andrija_radojevic_kk_mladost_maxbet.jpg', 28);
+INSERT INTO IGRACI VALUES (0600607001, 'Sreten', 'Knežević', 14, 1994, '206 cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/14_sreten_knezevic_kk_mladost_maxbet.jpg', 28);
+INSERT INTO IGRACI VALUES (0439811005, 'Aleksa', 'Ilić', 16, 2000, '205cm', 'Krilni centar/Centar', 'https://kls.rs/wp-content/uploads/2023/11/ilic_aleksandar_kk_mladost_max_bet-400x400.jpg', 28);
+INSERT INTO IGRACI VALUES (0000208006, 'Milan', 'Milošević', 18, 1985, '205cm', 'Centar', 'https://kls.rs/wp-content/uploads/2024/02/milosevic_milan_mladost_maxbet-400x400.jpg', 28);
+INSERT INTO IGRACI VALUES (0000123103, 'Tyron', 'Jumord Harris', 1, 1991, '188cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/12/Tyron-Jumord-Harris-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0614614019, 'Luka', 'Andrić', 3, 2004, '200cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/3_andric_luka_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0302111019, 'Bogdan', 'Petrović', 4, 2001, '194cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/4_petrovic_bogdan_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0300210023, 'Aleksa', 'Kovačević', 5, 2002, '190cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/5_kovacevic_aleksa_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0600112016, 'Bogdan', 'Savić', 6, 2001, '202cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/6_savic_bogdan_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0603001165, 'Stefan', 'Matović', 7, 1991, '203cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/7_matovic_stefan_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0000124004, 'Colin', 'Patrick Dougherty', 10, 1996, '193cm', 'Bek', 'https://kls.rs/wp-content/uploads/2024/02/colin_patrick_dougherty_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0603010016, 'Nikola', 'Stefanović', 12, 1999, '206cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/12_stefanovic_nikola_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0302114004, 'Matija', 'Jordović', 13, 2005, '187cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/13_jordovic_matija_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0601815001, 'Luka', 'Todosijević', 14, 2003, '197cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/14_todosijevic_luka_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0000123060, 'Kevin', 'Kangu', 15, 1998, '193cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/15_kevin_kangu_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0601210020, 'Srđan', 'Krsmanović', 18, 2000, '208cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/18_krsmanovic_srdjan_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0300208002, 'Nikola', 'Pavić', 21, 1999, '199cm', 'Bek/Krilo', 'https://kls.rs/wp-content/uploads/2023/09/21_pavic_nikola_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0661206001, 'Đorđe', 'Simeunović', 25, 1996, '200cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/25_simeunovic_djordje_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0603006019, 'Jovan', 'Stamenić', 44, 1996, '199cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/44_stamenic_jovan_kk_sloga-400x400.jpg', 29);
+INSERT INTO IGRACI VALUES (0506812002, 'Stojan', 'Dodić', 3, 1998, '200 cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/3_stojan_dodic_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0432808024, 'Miloš', 'Stajčić', 5, 1999, '206cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/5_milos_stajcic_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0000122084, 'Trey', 'Alexander Pulliam', 7, 1998, '192 cm', 'Plejmeker/Bek', 'https://kls.rs/wp-content/uploads/2023/09/7_trey_pulliam_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0600510009, 'Petar', 'Grojić', 8, 2001, '195cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/8_petar_grojic_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0601201167, 'Nikola', 'Pešaković', 11, 1991, '193cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/11_nikola_pesakovic_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0000213005, 'Stefan', 'Lakić', 12, 1995, '200cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/12_stefan_lakic_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0642401169, 'Dorđe', 'Majstorović', 13, 1990, '209cm', 'Krilni centar/Centar', 'https://kls.rs/wp-content/uploads/2023/09/13_djordje_majstorovic_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0105118001, 'Nikola', 'Gašić', 14, 2001, '212cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/14_nikola_gasic_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0431898035, 'Mladen', 'Pantić', 18, 1982, '210cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/18_mladen_pantic_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0153404007, 'Živojin', 'Alexandar Danilović', 23, 1993, '203cm', 'Krilo/Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/23_alexandar_zivojin_danilovic_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0000116028, 'Milutin', 'Vujičić', 27, 2002, '192cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2024/01/vujicic_milutin_kk_cacak_94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0642417047, 'Filip', 'Dumić', 44, 1990, '180 cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/44_filip_dumic_kk_cacak94_quantox-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0642401157, 'Jakov', 'Tatić', 80, 2006, '202cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2022/09/8_jakov_tatic_bek_krilo_edb_-0642417047-400x400.jpg', 30);
+INSERT INTO IGRACI VALUES (0000123042, 'Jalen', 'Tyrese Finch', 0, 1999, '185cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/0_jalen_tarens_finch_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0630215023, 'Vidak', 'Đurić', 1, 2003, '192cm', 'Bek', 'https://kls.rs/wp-content/uploads/2024/01/vidak_djuric_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0630213016, 'Petar', 'Bogićević', 4, 2002, '193cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/4_bogicevic-petar_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0630208006, 'Aleksa', 'Ćubić', 6, 2000, '202cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/6_cubic_aleksa_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0659918012, 'Vasilije', 'Jovanović', 7, 2007, '185cm', 'Plejmeker', 'https://kls.rs/wp-content/uploads/2023/09/7_jovanovic_vasilije__kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0405011013, 'Vuk', 'Borovićanin', 8, 2001, '203cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/8_borovicanin_vuk_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0603112071, 'Luka', 'Aksentijević', 9, 2002, '195cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/9_aksentijevic_luka_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0630210023, 'Đorđe', 'Božić', 10, 2001, '198cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/10_bozic_djordje_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0601917004, 'Luka', 'Vukajlović', 14, 2005, '190cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/14_vukajlovic_luka_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0559102536, 'Branislav', 'Đekić', 22, 1991, '209cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/22_branislav_djekic_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0000123105, 'Henson', 'Djimon Tyler', 32, 1998, '193cm', 'Bek', 'https://kls.rs/wp-content/uploads/2024/01/henson_djimon_tyler_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0603011016, 'Mihajlo', 'Mušikić', 33, 2002, '213cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/33-musikic_mihailo_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0203319013, 'Vuk', 'Jolić', 34, 2007, '196cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/34_jolic_vuk_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0000223006, 'Nemanja', 'Reljić', 55, 2000, '208cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/55_reljic_nemanja_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0602319020, 'Petar', 'Anđić', 66, 2008, '192cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg', 31);
+INSERT INTO IGRACI VALUES (0602110027, 'Slobodan', 'Mitrović', 77, 2005, '195cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/77_mitrovic_slobodan_kk_sloboda-400x400.jpg', 31);
+INSERT INTO IGRACI VALUES (0000124001, 'Wendell', 'Jerome Green Jr', 1, 2002, '#cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2024/01/wendell_jerome_green_jr-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0302817003, 'Ahmed', 'Jerebičanin', 5, 2005, '200cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/ahmed_jerebicanin_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0302814008, 'Muhamed', 'Salihović', 6, 2004, '195cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/muhamed_salihovic_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0724708008, 'Luka', 'Vasić', 7, 1998, '205cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/vasic_luka_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0302819018, 'Sultan', 'Numanović', 12, 2006, '200cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/numanovic_sultan_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0601113009, 'Željko', 'Milić', 13, 2003, '202cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/milic_zeljko_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0000122072, 'Marko', 'Gutalj', 14, 2001, '206cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/gutalj_marko_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0506308005, 'Lazar', 'Stanković', 16, 1999, '206cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/stankovic_lazar_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0601118025, 'Jasin', 'Pilica', 18, 2005, '205cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/pilica_jasin_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0000123062, 'Boyd', 'Lamont Dedric', 20, 1998, '195cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/dedrick_boyd_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0000123095, 'Motley', 'Christopher Terrance', 25, 1991, '201cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/12/terrance_christopher_motley_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0302111025, 'Stevan', 'Karapandžić', 26, 2001, '191cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/11/26_karapandzic-stevan_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0603214001, 'Altin', 'Islamović', 77, 2000, '202cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/islamovic_altin_okk_novi_pazar-400x400.jpg', 32);
+INSERT INTO IGRACI VALUES (0000123061, 'Elvis', 'Dale Harvey', 2, 1997, '205cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2024/01/elvis_dale_harvey_zdravlje_leskovac-400x400.jpg', 33);
+INSERT INTO IGRACI VALUES (0802104062, 'Dragomir', 'Jović', 4, 1994, '189cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/4_dragomir_jovic_kk_zdravlje_leskovac-400x400.jpg', 33);
+INSERT INTO IGRACI VALUES (0869012004, 'Miloš', 'Gavrilović', 5, 2003, '192cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/5_milos_gavrilovic_kk_zdravlje_leskovac-400x400.png', 33);
+INSERT INTO IGRACI VALUES (0800310048, 'Đorđe', 'Jović', 7, 2001, '195cm', 'Plejmejker/Bek', 'https://kls.rs/wp-content/uploads/2023/09/7_djordje_jovic_kk_zdravlje_leskovac-400x400.png', 33);
+INSERT INTO IGRACI VALUES (0000123066, 'Harvey', 'Zachary', 11, 2001, '197cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/11_zachary_hardey_kk_zdravlje_leskovac-400x400.jpg', 33);
+INSERT INTO IGRACI VALUES (0802102327, 'Aleksandar', 'Andrejević', 12, 1991, '212cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/12_aleksandar_andrejevic_kk_zdravlje_leskovac-400x400.png', 33);
+INSERT INTO IGRACI VALUES (0855723001, 'Lazar', 'Vujišić', 16, 2007, '188cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/16_lazar_vujisic_kk_zdravlje_leskovac-400x400.png', 33);
+INSERT INTO IGRACI VALUES (0801820007, 'Petar', 'Đikić', 17, 2007, '187cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/17_petar_djikic_kk_zdravlje_leskovac-400x400.png', 33);
+INSERT INTO IGRACI VALUES (0869016021, 'Nikola', 'Ilić', 18, 2007, '187cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/34_nikola_ilic_kk_zdravlje_leskovac-400x401.png', 33);
+INSERT INTO IGRACI VALUES (0801820001, 'Uroš', 'Stanojković', 19, 2007, '186cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/19_uros_stanojkovic_kk_zdravlje_leskovac-400x401.png', 33);
+INSERT INTO IGRACI VALUES (0801822014, 'Marko', 'Savić', 20, 2008, '187cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/20_marko_savic_kk_zdravlje_leskovac-400x400.png', 33);
+INSERT INTO IGRACI VALUES (0200704017, 'Aleksa', 'Nikolić', 21, 1995, '200cm', 'Bek', 'https://kls.rs/wp-content/uploads/2024/01/aleksa_nikolic_kk_zdravlje_leskovac_2024-400x400.jpg', 33);
+INSERT INTO IGRACI VALUES (0869013016, 'Lazar', 'Tasić', 23, 2005, '204cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/23_lazar_tasic_kk_zdravlje_leskovac-400x400.png', 33);
+INSERT INTO IGRACI VALUES (0000223005, 'Miloš', 'Dugalić', 25, 2000, '204cm', 'Krilo/Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/25_milos_dugalic_kk_zdravlje_leskovac-400x399.png', 33);
+INSERT INTO IGRACI VALUES (0000123064, 'Blakney', 'Scott', 34, 1998, '203cm', 'Krilni centar/Centar', 'https://kls.rs/wp-content/uploads/2023/09/34_scott_blakney_kk_zdravlje_leskovac-400x400.png', 33);
+INSERT INTO IGRACI VALUES (0000123065, 'Jordan', 'Callahan', 67, 1990, '185cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/67_jordan_callahan_kk_zdravlje_leskovac-400x400.jpg', 33);
+INSERT INTO IGRACI VALUES (0506803019, 'Jovan', 'Đorđević Marinković', 77, 1993, '200cm','Krilo','https://kls.rs/wp-content/uploads/2023/11/jovan_djordjevic_marinkovic-400x400.jpg',33);
+INSERT INTO IGRACI VALUES (0000123100, 'Lamont', 'Lavell West', 0, 1997, '205cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/12/lamont_lavell_west_kk_spd_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0000124002, 'Kobe', 'Thomas Webster', 1, 1999, '185cm', 'Bek', 'https://kls.rs/wp-content/uploads/2024/01/kobe_thomas_webster_kk_spd_radnicki_kls-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0169207034, 'Aleksa', 'Čabrilo', 4, 1997, '204cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/cabrilo_aleksa_kk_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0000123033, 'Quinterious', 'Trayvon Croft', 5, 1997, '190cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/10/quinterious_trayvon_croft_kk_radnicki-1-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0502797030, 'Marko', 'Đerasimović', 7, 1984, '200cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/djerasimovic_marko_kk_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0557004011, 'Đorđe', 'Milosavljević', 9, 1994, '193cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/milosavljevic_djordje_kk_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0459412005, 'Vuk', 'Dobrašinović', 10, 2002, '200cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/dobrasinovic_vuk_kk_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0503012004, 'Danilo', 'Labović', 13, 2003, '192cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/labovic_lanilo_kk_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0501514138, 'Nikola', 'Vasilić', 15, 2006, '197cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/vasilic_nikola_spd_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0513699056, 'Uroš', 'Nikolić', 19, 1987, '207cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/nikolic_uros_kk_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0223509015, 'Đuro', 'Dautović', 22, 2001, '200cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/dautovic_djuro_kk_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0642416013, 'Pavle', 'Nikolić', 23, 2005, '200cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/10/nikolic_pavle_spd_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0557000024, 'Blagoje', 'Milić', 24, 1991, '198cm', 'Krilo', 'https://kls.rs/wp-content/uploads/2023/09/blagojevic_milic_kk_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0502912009, 'Nenad', 'Filipović', 55, 2005, '193cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/filipovic_nenad_kk_radnicki-400x400.jpg', 34);
+INSERT INTO IGRACI VALUES (0000123092, 'Rashun', 'Jarrell Davis', 0, 1993, '183cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/11/rashun_jarrell_davis_kk_joker-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0509706024, 'Lazar', 'Lugić', 1, 1998, '210cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/1_lazar_lugic-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0431805016, 'Nemanja', 'Kapetanović', 3, 1997, '197cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/10/3_kapetanovic_nemanja_kk_joker-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0802106007, 'Aleksa', 'Jugović', 4, 1995, '190cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/4_aleksa_jugovic-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0107504016, 'Aleksa', 'Brbaklić', 7, 1995, '195cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/7_aleksa_brbaklic-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0410912027, 'Luka', 'Marković', 8, 2006, '195cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/8_luka_markovic-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0169211013, 'Ognjen', 'Vukas', 10, 2003, '189cm', 'Plejmejker', 'https://kls.rs/wp-content/uploads/2023/09/10_ognjen_vukas-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0107598172, 'Zoran', 'Krstanović', 11, 1982, '204cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/11_zoran_krstanovic-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0660016010, 'Veljko', 'Kovačević', 14, 2005, '206cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/14_veljko_kovacevic-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0223915004, 'Boris', 'Bodrožić', 17, 2004, '211cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/17_boris_bodrozic-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0101815001, 'Aleksa', 'Stanojević', 22, 2006, '204cm', 'Krilni centar', 'https://kls.rs/wp-content/uploads/2023/09/22_aleksa_stanojevic-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0000123015, 'Zachary', 'Cleveland Simmons', 24, 1999, '205cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/09/24_simmons_zachary-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0141115007, 'Uroš', 'Višnić', 44, 2005, '194cm', 'Bek', 'https://kls.rs/wp-content/uploads/2023/09/44_uros_visnic-400x400.jpg', 35);
+INSERT INTO IGRACI VALUES (0460505034, 'Matija', 'Milin', 58, 1995, '206cm', 'Centar', 'https://kls.rs/wp-content/uploads/2023/10/58_matija_milan_kk_joker-400x400.jpg', 35);
+
+~ZAPOSLENI~
+INSERT INTO ZAPOSLENI VALUES ('6171', 'Strajin','Nedović','https://kls.rs/wp-content/uploads/2023/09/strajin_nedovic_trener-400x400.jpg',20,11111);
+INSERT INTO ZAPOSLENI VALUES ('C-4207', 'Vladimir','Jovanović','https://kls.rs/wp-content/uploads/2023/11/spartak-kls-jovanovic-400x400.jpg',21,11111);
+INSERT INTO ZAPOSLENI VALUES ('1355', 'Miloš','Kovačević-Isakov','https://kls.rs/wp-content/uploads/2022/09/milos_isakov_kovacevic_trener_kk_vojvodina-400x400.jpg',22,11111);
+INSERT INTO ZAPOSLENI VALUES ('4049', 'Srđan','Flajs','https://kls.rs/wp-content/uploads/2023/11/flajs_srdjan_trener_kk_metalac-400x400.jpg',23,11111);
+INSERT INTO ZAPOSLENI VALUES ('C-4272', 'Vule','Avdalović', 'https://kls.rs/wp-content/uploads/2023/10/avdalovic_vule_trener_okk_beograd-400x400.jpg',24,11111);
+INSERT INTO ZAPOSLENI VALUES ('5081', 'Nikola','Marković','https://kls.rs/wp-content/uploads/2024/02/markovic_nikola_kk_dynamic_balkan_bet-400x400.jpg',25,11111);
+INSERT INTO ZAPOSLENI VALUES ('2128', 'Bojan','Jovičić','https://kls.rs/wp-content/uploads/2021/11/bojan_jovicic_trener-400x400.jpg',26,11111);
+INSERT INTO ZAPOSLENI VALUES ('C-7207', 'Lazar','Spasić','https://kls.rs/wp-content/uploads/2023/10/lazar_spasic_kk_vrsac-400x400.jpg',27,11111);
+INSERT INTO ZAPOSLENI VALUES ('C-6125', 'Miloš','Obrenović','https://kls.rs/wp-content/uploads/2023/09/milos_obrenovic_trener_kk_mladost_maxbet_c_6125-400x400.jpg',28,11111);
+INSERT INTO ZAPOSLENI VALUES ('C-5233', 'Saša','Đorđević','https://kls.rs/wp-content/uploads/2023/09/djordjevic_sasa_pom_trener_kk_sloga-400x400.jpg',29,11111);
+INSERT INTO ZAPOSLENI VALUES ('C-6322', 'Đorđe','Mićić','https://kls.rs/wp-content/uploads/2023/09/djordje_micic_trener_c6322-400x400.jpg',30,11111);
+INSERT INTO ZAPOSLENI VALUES ('C-6071', 'Vladimir','Lučić','https://kls.rs/wp-content/uploads/2023/09/lucic_vladimir_trener_kk_sloboda-400x400.jpg',31,11111);
+INSERT INTO ZAPOSLENI VALUES ('C-6062', 'Zoran','Milovanović','https://kls.rs/wp-content/uploads/2024/01/milovanovic_zoran_okk_novi_pazar-400x400.jpg',32,11111);
+INSERT INTO ZAPOSLENI VALUES ('C-8101','Nikola','Ristić','https://kls.rs/wp-content/uploads/2023/09/nikola_ristic_trener_kk_zdravlje_leskovac-400x400.png',33,11111);
+INSERT INTO ZAPOSLENI VALUES ('4680', 'Marko','Simonović','https://kls.rs/wp-content/uploads/2024/01/simonovic_marko_spd_radnicki_kls-400x400.jpg',34,11111);
+INSERT INTO ZAPOSLENI VALUES ('C-9006', 'Željko','Lukajić','https://kls.rs/wp-content/uploads/2023/10/zeljko_lukajic_kk_joker-400x400.jpg',35,11111);
+INSERT INTO ZAPOSLENI VALUES ('1351', 'Slobodan', 'Ljubotina', 'https://kls.rs/wp-content/uploads/2023/09/slobodan_ljubotina-400x400.jpg', 21,22222);
+INSERT INTO ZAPOSLENI VALUES ('4023', 'Radivoj', 'Mandić', 'https://kls.rs/wp-content/uploads/2023/09/mandic_radivoj_kk_dynamic-400x400.jpg', 25,22222);
+INSERT INTO ZAPOSLENI VALUES ('C-6242', 'Luka', 'Milinković', 'https://kls.rs/wp-content/uploads/2023/09/luka_milinkovic_pratilac_kk_mladost_maxbet-400x400.jpg', 28,22222);
+INSERT INTO ZAPOSLENI VALUES ('6206', 'Vladimir', 'Marić', 'https://kls.rs/wp-content/uploads/2023/09/maric_vladimir_pom_trener_kk_sloboda-400x400.jpg', 31,22222);
+INSERT INTO ZAPOSLENI VALUES ('C-2083', 'Miljan', 'Ivanović', 'https://kls.rs/wp-content/uploads/2023/10/miljan_ivanovi_pomocni_trener_kk_joker-400x400.jpg', 35,22222);
+INSERT INTO ZAPOSLENI VALUES (500, 'Ivan', 'Tmušić', 'https://kls.rs/wp-content/uploads/2022/09/ivan_tmusic_pratilac-400x400.jpg', 20,33333);
+INSERT INTO ZAPOSLENI VALUES (501, 'Nikola', 'Jeremić', 'https://kls.rs/wp-content/uploads/2023/09/nikola_jeremic_pratilac-400x400.jpg', 20,33333);
+INSERT INTO ZAPOSLENI VALUES (502, 'Aleksandar', 'Pavlović', 'https://kls.rs/wp-content/uploads/2021/11/pavlovic_aleksandar-400x400.jpg', 20,33333);
+INSERT INTO ZAPOSLENI VALUES (503, 'Predrag', 'Prlja', 'https://kls.rs/wp-content/uploads/2023/09/predrag_prlja-400x400.jpg', 21,33333);
+INSERT INTO ZAPOSLENI VALUES (504, 'Milica', 'Radonjić', 'https://kls.rs/wp-content/uploads/2023/09/milica_radonjic-400x400.jpg', 21,33333);
+INSERT INTO ZAPOSLENI VALUES (505, 'Nemanja', 'Jovandić', 'https://kls.rs/wp-content/uploads/2024/01/jovandic-kls-400x400.jpg', 21,33333);
+INSERT INTO ZAPOSLENI VALUES (506, 'Milan', 'Mirković', 'https://kls.rs/wp-content/uploads/2024/02/milan_mirkovic_vojvodina_mts-400x400.jpg', 22,33333);
+INSERT INTO ZAPOSLENI VALUES (507, 'Aleksandar', 'Pilipović', 'https://kls.rs/wp-content/uploads/2022/09/pilipovic_aleksandar_pomocni_trener_kk_vojvodina-400x400.jpg', 22,33333);
+INSERT INTO ZAPOSLENI VALUES (508, 'Stefan', 'Škripac', 'https://kls.rs/wp-content/uploads/2022/09/skripac_stefan_pomicni_trener_kk_vojvodina-1-400x400.jpg', 22,33333);
+INSERT INTO ZAPOSLENI VALUES (509, 'Aleksandar', 'Karać', 'https://kls.rs/wp-content/uploads/2021/11/karac_aleksandar-400x400.jpg', 22,33333);
+INSERT INTO ZAPOSLENI VALUES (510, 'Božidar', 'Glišić', 'https://kls.rs/wp-content/uploads/2023/09/bozidar_glisic_fizioterapeut__kk_metalac-400x400.jpg', 23,33333);
+INSERT INTO ZAPOSLENI VALUES (511, 'Radiša', 'Maksimović', 'https://kls.rs/wp-content/uploads/2023/09/radisa_maksimovic_pratilac__kk_metalac-400x400.jpg', 23,33333);
+INSERT INTO ZAPOSLENI VALUES (512, 'Veselin', 'Petrović', 'https://kls.rs/wp-content/uploads/2023/10/petrovic_veselin_okk_beograd-400x400.jpg', 24,33333);
+INSERT INTO ZAPOSLENI VALUES (513, 'Aleksandar', 'Rašić', 'https://kls.rs/wp-content/uploads/2023/10/rasic_aleksandar_okk_beograd-400x400.jpg', 24,33333);
+INSERT INTO ZAPOSLENI VALUES (514, 'Marko', 'Đurković', 'https://kls.rs/wp-content/uploads/2023/10/djurkovic_marko_okk_beograd-400x400.jpg', 24,33333);
+INSERT INTO ZAPOSLENI VALUES (515, 'Nikola', 'Karaklajić', 'https://kls.rs/wp-content/uploads/2023/11/karakljajic_nikola_okk_beograd-400x400.jpg', 24,33333);
+INSERT INTO ZAPOSLENI VALUES (516, 'Ana', 'Đorđević', 'https://kls.rs/wp-content/uploads/2023/10/ana_okk_beograd-400x400.jpg', 24,33333);
+INSERT INTO ZAPOSLENI VALUES (517, 'Tamara', 'Vesković', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg', 24,33333);
+INSERT INTO ZAPOSLENI VALUES (518, 'Nemanja', 'Jovićević', 'https://kls.rs/wp-content/uploads/2023/09/jovicevic_nemanja_kk_dynamic-400x400.jpg', 25,33333);
+INSERT INTO ZAPOSLENI VALUES (519, 'Božidar', 'Babović', 'https://kls.rs/wp-content/uploads/2023/09/babovic_bozidar_kk_dynamic-400x400.jpg', 25,33333);
+INSERT INTO ZAPOSLENI VALUES (520, 'Luka', 'Goronjić', 'https://kls.rs/wp-content/uploads/2023/09/luka_goronjic_kk_dynamic-400x400.jpg', 25,33333);
+INSERT INTO ZAPOSLENI VALUES (521, 'Mišo', 'Mirčeta', 'https://kls.rs/wp-content/uploads/2024/02/mirceta_miso_kk_dynamic-balkan_bet-400x400.jpg', 25,33333);
+INSERT INTO ZAPOSLENI VALUES (522, 'Miljan', 'Milić', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg', 25,33333);
+INSERT INTO ZAPOSLENI VALUES (523, 'Stefan', 'Perić', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg', 25,33333);
+INSERT INTO ZAPOSLENI VALUES (524, 'Aleksandar', 'Jovanović', 'https://kls.rs/wp-content/uploads/2023/09/aleksandar_jovanovic_kk_tamis-400x400.jpeg', 26,33333);
+INSERT INTO ZAPOSLENI VALUES (525, 'Nikola', 'Jovičić', 'https://kls.rs/wp-content/uploads/2023/09/nikola_jovicic_kk_tamis-400x400.jpeg', 26,33333);
+INSERT INTO ZAPOSLENI VALUES (526, 'Zoran', 'Topić', 'https://kls.rs/wp-content/uploads/2021/11/pomocni_trener_zoran_topic-400x400.jpg', 26,33333);
+INSERT INTO ZAPOSLENI VALUES (527, 'Rade', 'Kozomara', 'https://kls.rs/wp-content/uploads/2023/09/rade_kozomora_kondicioni_mladost_maxbet-400x400.jpg', 28,33333);
+INSERT INTO ZAPOSLENI VALUES (528, 'Saša', 'Vasiljević', 'https://kls.rs/wp-content/uploads/2023/09/sasa_vasiljevic_pratilac_mladost_maxbet-400x400.jpg', 28,33333);
+INSERT INTO ZAPOSLENI VALUES (529, 'Marko', 'Savić', 'https://kls.rs/wp-content/uploads/2024/01/savic_marko_kk_mladost_maxbet-400x400.jpg', 28,33333);
+INSERT INTO ZAPOSLENI VALUES (530, 'Marko', 'Marinović', 'https://kls.rs/wp-content/uploads/2023/09/marko_marinovic_strucni_savetnik-400x400.jpg', 30,33333);
+INSERT INTO ZAPOSLENI VALUES (531, 'Nikola', 'Keljević', 'https://kls.rs/wp-content/uploads/2023/09/nikola_keljevic_sluzbeni_predstavnik-400x400.jpg', 30,33333);
+INSERT INTO ZAPOSLENI VALUES (532, 'Radenko', 'Pilcevic', 'https://kls.rs/wp-content/uploads/2023/09/radenko_pilcevic_sportski_direktor-400x400.jpg', 30,33333);
+INSERT INTO ZAPOSLENI VALUES (533, 'Đorđe', 'Ćosović', 'https://kls.rs/wp-content/uploads/2023/12/cosovic-djordje_kk_cacak_94_quantox-400x400.jpeg', 30,33333);
+INSERT INTO ZAPOSLENI VALUES (534, 'Damir', 'Biberović', 'https://kls.rs/wp-content/uploads/2023/11/biberovic_damir_okk_novi_pazar-400x400.jpg', 32,33333);
+INSERT INTO ZAPOSLENI VALUES (535, 'Demir', 'Spica', 'https://kls.rs/wp-content/uploads/2023/09/spica_demir_okk_novi_pazar-400x400.jpg', 32,33333);
+INSERT INTO ZAPOSLENI VALUES (536, 'Amer', 'Mulić', 'https://kls.rs/wp-content/uploads/2023/09/mulic_amer_okk_novi_pazar-400x400.jpg', 32,33333);
+INSERT INTO ZAPOSLENI VALUES (537, 'Liljana', 'Đorđević', 'https://kls.rs/wp-content/uploads/2023/09/ljiljana_djordjevic_kk_zdravlje_leskovac-400x401.png', 33,33333);
+INSERT INTO ZAPOSLENI VALUES (538, 'Dušan', 'Radovanović', 'https://kls.rs/wp-content/uploads/2023/09/Dusan_Radovanovic-KLS-1-400x415.png', 33,33333);
+INSERT INTO ZAPOSLENI VALUES (539, 'Antonije', 'Zakić', 'https://kls.rs/wp-content/uploads/2023/09/zakic_antonije_kk_radnicki-400x400.jpg', 34,33333);
+INSERT INTO ZAPOSLENI VALUES (540, 'Srećko', 'Otović', 'https://kls.rs/wp-content/uploads/2023/12/otovic_srecko_kk_radnicki-400x400.jpg', 34,33333);
+INSERT INTO ZAPOSLENI VALUES (541, 'Pavle', 'Drobnjak', 'https://kls.rs/wp-content/uploads/2023/09/drobnjak_pavle_kk_radnicki-400x400.jpg', 34,33333);
+INSERT INTO ZAPOSLENI VALUES (542, 'Miloš', 'Rakić', 'https://kls.rs/wp-content/uploads/2023/09/rakic_milos_kk_radnicki-400x400.jpg', 34,33333);
+INSERT INTO ZAPOSLENI VALUES (543, 'Mihailo', 'Šubaranović', 'https://kls.rs/wp-content/uploads/2023/11/mihailo_subaranovic_kk_joker-400x400.jpg', 35,33333);
+INSERT INTO ZAPOSLENI VALUES (544, 'Lazar', 'Jokić', 'https://kls.rs/wp-content/uploads/2023/09/ekonom_lazar_jokic-400x400.jpg', 35,33333);
+INSERT INTO ZAPOSLENI VALUES (600, 'Aleksandar', 'Jevđić', 'https://kls.rs/wp-content/uploads/2023/09/aleksandar_jevdjic_sluzbeni-predstavnik-400x400.jpg',20,44444);
+INSERT INTO ZAPOSLENI VALUES (601, 'Nebojša', 'Božović', 'https://kls.rs/wp-content/uploads/2022/09/nebojsa_bozovic_sluzbeni-predstavnik-400x400.jpg',20,44444);
+INSERT INTO ZAPOSLENI VALUES (602, 'Đorđe', 'Aleksandrić', 'https://kls.rs/wp-content/uploads/2022/09/djordje_aleksandric_sluzbeni-predstavnik-400x400.jpg',20,44444);
+INSERT INTO ZAPOSLENI VALUES (603, 'Jovan', 'Sirovina', 'https://kls.rs/wp-content/uploads/2023/09/jovan_sirovina.jpg-400x400.jpg', 21,44444);
+INSERT INTO ZAPOSLENI VALUES (604, 'Darko', 'Papac', 'https://kls.rs/wp-content/uploads/2023/09/darko_papac-400x400.jpg',21,44444);
+INSERT INTO ZAPOSLENI VALUES (605, 'Sava', 'Rajković', 'https://kls.rs/wp-content/uploads/2023/10/sava_rajkovic_sluzbeni_predstavnik_kk_vojvodina-400x400.jpg',22,44444);
+INSERT INTO ZAPOSLENI VALUES (606, 'Dragan', 'Gutović', 'https://kls.rs/wp-content/uploads/2024/02/gutovic_dragan_kk_vojvodina_mts-400x400.jpg',22,44444);
+INSERT INTO ZAPOSLENI VALUES (607, 'Mićo', 'Radanović', 'https://kls.rs/wp-content/uploads/2024/02/radanovic_mico_kk_vojvodina_mts-400x400.jpg',22,44444);
+INSERT INTO ZAPOSLENI VALUES (608, 'Filip', 'Nedić', 'https://kls.rs/wp-content/uploads/2023/12/nedic_filip_kk_metalac-400x400.jpg',23,44444);
+INSERT INTO ZAPOSLENI VALUES (609, 'Vladan', 'Janković', 'https://kls.rs/wp-content/uploads/2023/12/vladan_jankovic_kk_metala-400x400.jpg',23,44444);
+INSERT INTO ZAPOSLENI VALUES (610, 'Vladimir', 'Panić', 'https://kls.rs/wp-content/uploads/2023/09/vladimir_panic_sl_predstavnik__kk_metalac-400x400.jpg',23,44444);
+INSERT INTO ZAPOSLENI VALUES (611, 'Miloš', 'Dimitrijević', 'https://kls.rs/wp-content/uploads/2023/10/dimitrijevic_milos_okk_beograd-400x400.jpg',24,44444);
+INSERT INTO ZAPOSLENI VALUES (612, 'Predrag', 'Kanački', 'https://kls.rs/wp-content/uploads/2023/09/kanacki_predrag_kk_dynamic-400x400.jpg',25,44444);
+INSERT INTO ZAPOSLENI VALUES (613, 'Saša', 'Radović', 'https://kls.rs/wp-content/uploads/2022/10/radovic_sasa_kk_tamis-400x400.jpg',26,44444);
+INSERT INTO ZAPOSLENI VALUES (614, 'Lazar', 'Dejanović', 'https://kls.rs/wp-content/uploads/2021/11/dejanovic_lazar_pomocni_trener-400x400.jpg',26,44444);
+INSERT INTO ZAPOSLENI VALUES (615, 'Kristijan', 'Serman', 'https://kls.rs/wp-content/uploads/2021/11/kristian_serman_direktor-400x400.jpg',27,44444);
+INSERT INTO ZAPOSLENI VALUES (616, 'Miloš', 'Živković', 'https://kls.rs/wp-content/uploads/2021/11/milos_zivkovic_sekretar-400x400.jpg',27,44444);
+INSERT INTO ZAPOSLENI VALUES (617, 'Miroslav', 'Nikolić', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg',27,44444);
+INSERT INTO ZAPOSLENI VALUES (618, 'Aleksandar', 'Marković', 'https://kls.rs/wp-content/uploads/2021/12/markovic_aleksandar_mladost-400x400.jpg',28,44444);
+INSERT INTO ZAPOSLENI VALUES (619, 'Zoran', 'Petrović', 'https://kls.rs/wp-content/uploads/2023/09/petrovic_zoran-400x400.jpg',29,44444);
+INSERT INTO ZAPOSLENI VALUES (620, 'Bojan', 'Gicić', 'https://kls.rs/wp-content/uploads/2023/10/gicic-bojan_kk_sloga-400x400.jpg',29,44444);
+INSERT INTO ZAPOSLENI VALUES (621, 'Miloš', 'Mijailović', 'https://kls.rs/wp-content/uploads/2021/11/milos_mijailovic-400x400.jpg',29,44444);
+INSERT INTO ZAPOSLENI VALUES (622, 'Kosta', 'Nikitović', 'https://kls.rs/wp-content/uploads/2023/09/kosta_nikitovic_tim_menadzer-400x400.jpg',30,44444);
+INSERT INTO ZAPOSLENI VALUES (623, 'Srbislav', 'Grujičić', 'https://kls.rs/wp-content/uploads/2023/09/grujicic_srbislav_kk_sloboda-400x400.jpg',31,44444);
+INSERT INTO ZAPOSLENI VALUES (624, 'Dejan', 'Hristovski', 'https://kls.rs/wp-content/uploads/2023/09/hristovski_dejan_kk_sloboda-400x400.jpg',31,44444);
+INSERT INTO ZAPOSLENI VALUES (625, 'Aldin', 'Muratović', 'https://kls.rs/wp-content/uploads/2023/09/muratovic-aldin_okk_novi_pazar-400x400.jpg',32,44444);
+INSERT INTO ZAPOSLENI VALUES (626, 'Sead', 'Jerebičanin', 'https://kls.rs/wp-content/uploads/2023/09/jerebicanin_sead_okk_novi_pazar-400x400.jpg',32,44444);
+INSERT INTO ZAPOSLENI VALUES (627, 'Igor', 'Stojanović', 'https://kls.rs/wp-content/uploads/2023/09/Igor_Stojanovic_kk_zdravlje_leskovac-400x400.png',33,44444);
+INSERT INTO ZAPOSLENI VALUES (628, 'Sanel', 'Mukanović', 'https://kls.rs/wp-content/uploads/2023/09/sanel_mukanovic_kk_zdravlje_leskovac-400x400.png',33,44444);
+INSERT INTO ZAPOSLENI VALUES (629, 'Darko', 'Brajković', 'https://kls.rs/wp-content/uploads/2023/09/brajkovic_darko_kk_radnicki-400x400.jpg',34,44444);
+INSERT INTO ZAPOSLENI VALUES (630, 'Milan', 'Stojkov', 'https://kls.rs/wp-content/uploads/2023/09/pomocni_trener_milan_stojkov-400x400.jpg',35,44444);
+INSERT INTO ZAPOSLENI VALUES (700, 'Snežana', 'Dabić', 'https://kls.rs/wp-content/uploads/2022/09/snezana_dabic_lekar-1-400x400.jpg', 20,55555);
+INSERT INTO ZAPOSLENI VALUES (701, 'Mihajlo', 'Vidanović', 'https://kls.rs/wp-content/uploads/2023/12/mihajlo_vidanovic-400x400.jpg', 21,55555);
+INSERT INTO ZAPOSLENI VALUES (702, 'dr Milić', 'Kovačević', 'https://kls.rs/wp-content/uploads/2023/09/dr_milic_kovacevic_kk_metalac-400x400.jpg', 23,55555);
+INSERT INTO ZAPOSLENI VALUES (703, 'Boris', 'Ukropina', 'https://kls.rs/wp-content/uploads/2021/11/ukropina_boris-400x400.jpg', 24,55555);
+INSERT INTO ZAPOSLENI VALUES (704, 'Srđan', 'Marinković', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg', 25,55555);
+INSERT INTO ZAPOSLENI VALUES (705, 'Darko', 'Kostić', 'https://kls.rs/wp-content/uploads/2021/11/kostic_darko_fizioterapeut-400x400.jpg', 26,55555);
+INSERT INTO ZAPOSLENI VALUES (706, 'Zoran', 'Đurđev', 'https://kls.rs/wp-content/uploads/2021/11/djurdjev_zoran_lekar-1-400x400.jpg', 26,55555);
+INSERT INTO ZAPOSLENI VALUES (707, 'Aleksa', 'Dobričić', 'https://kls.rs/wp-content/uploads/2023/09/aleksa_dobricic_fizijo_kk_mladost-400x400.jpg', 28,55555);
+INSERT INTO ZAPOSLENI VALUES (708, 'Aleksandar', 'Dumić', 'https://kls.rs/wp-content/uploads/2023/09/dumic-aleksandar-400x400.jpg', 29,55555);
+INSERT INTO ZAPOSLENI VALUES (709, 'Bojan', 'Lazić', 'https://kls.rs/wp-content/uploads/2023/02/doktor_bojan_lazic_cacak_94_quantox-400x400.jpg', 30,55555);
+INSERT INTO ZAPOSLENI VALUES (710, 'Stevan', 'Kljajić', 'https://kls.rs/wp-content/uploads/2023/09/kljajic_stevan_kk_sloboda-400x400.jpg', 31,55555);
+INSERT INTO ZAPOSLENI VALUES (711, 'Goran', 'Tošković', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg', 31,55555);
+INSERT INTO ZAPOSLENI VALUES (712, 'Željko', 'Maksimović', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg', 31,55555);
+INSERT INTO ZAPOSLENI VALUES (713, 'Zijad', 'Ujkanović', 'https://kls.rs/wp-content/uploads/2023/09/ujkanovic_zijad_okk_novi_pazar-400x400.jpg', 32,55555);
+INSERT INTO ZAPOSLENI VALUES (714, 'Sadin', 'Plojović', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg', 32,55555);
+INSERT INTO ZAPOSLENI VALUES (715, 'Srđan', 'Matić', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg', 33,55555);
+INSERT INTO ZAPOSLENI VALUES (716, 'Ninoslava', 'Stamenković', 'https://kls.rs/wp-content/uploads/2021/09/icon_person.jpg', 33,55555);
+INSERT INTO ZAPOSLENI VALUES (717, 'Ognjen', 'Ćopić', 'https://kls.rs/wp-content/uploads/2023/09/fizioterapeut_ognjen_copic-400x400.jpg', 35,55555);
+
+~UTAKMICE~
+INSERT INTO UTAKMICE VALUES (20, 28, '98:90', 'Stojanović Milan', 400,TO_DATE('01/03/2024','DD-MM-YYYY'),'800');
+INSERT INTO UTAKMICE VALUES (30, 20, '81:82', 'Krneta Milan', 100,TO_DATE('02/03/2024','DD-MM-YYYY'), '801');
+INSERT INTO UTAKMICE VALUES (21, 22, '83:72', 'Stojanović Srđan', 1800,TO_DATE('03/03/2024','DD-MM-YYYY'), '802');
+INSERT INTO UTAKMICE VALUES (22, 21, '91:87', 'Andrijanić Srđan', 200,TO_DATE('04/03/2024','DD-MM-YYYY'), '803');
+INSERT INTO UTAKMICE VALUES (22, 25, '83:79', 'Vlahović Zoran', 100,TO_DATE('05/03/2024','DD-MM-YYYY'), '804');
+INSERT INTO UTAKMICE VALUES (25, 22, '69:72', 'Stojanović Srđan', 150,TO_DATE('06/03/2024','DD-MM-YYYY'), '805');
+INSERT INTO UTAKMICE VALUES (23, 28, '84:73', 'Ilić Dragutin', 500,TO_DATE('07/03/2024','DD-MM-YYYY'), '806');
+INSERT INTO UTAKMICE VALUES (32, 23, '84:85', 'Dostanić Momčilo', 200,TO_DATE('08/03/2024','DD-MM-YYYY'), '807');
+INSERT INTO UTAKMICE VALUES (24, 26, '105:110', 'Vlahović Zoran', 100,TO_DATE('09/03/2024','DD-MM-YYYY'), '808');
+INSERT INTO UTAKMICE VALUES (33, 24, '103:97', 'Manojlović Dušan', 300,TO_DATE('10/03/2024','DD-MM-YYYY'), '809');
+INSERT INTO UTAKMICE VALUES (25, 33, '102:72', 'Miljus Predrag', 0,TO_DATE('11/03/2024','DD-MM-YYYY'), '810');
+INSERT INTO UTAKMICE VALUES (34, 25, '75:85', 'Stojanović Milan', 1000,TO_DATE('12/03/2024','DD-MM-YYYY'), '811');
+INSERT INTO UTAKMICE VALUES (26, 30, '85:91', 'Tasić Milan', 200,TO_DATE('13/03/2024','DD-MM-YYYY'), '812');
+INSERT INTO UTAKMICE VALUES (31, 26, '90:95', 'Manojlović Dušan', 300,TO_DATE('14/03/2024','DD-MM-YYYY'), '813');
+INSERT INTO UTAKMICE VALUES (27, 21, '87:66', 'Todorović Slobodan', 500,TO_DATE('15/03/2024','DD-MM-YYYY'), '814');
+INSERT INTO UTAKMICE VALUES (29, 27, '70:89', 'Dostanić Momčilo', 1000,TO_DATE('16/03/2024','DD-MM-YYYY'), '815');
+INSERT INTO UTAKMICE VALUES (28, 25, '81:62', 'Miljus Predrag', 150,TO_DATE('17/03/2024','DD-MM-YYYY'), '816');
+INSERT INTO UTAKMICE VALUES (29, 34, '84:75', 'Dostanić Momčilo', 1000,TO_DATE('19/03/2024','DD-MM-YYYY'), '818');
+INSERT INTO UTAKMICE VALUES (21, 29, '99:80', 'Živanović Vladimir', 800,TO_DATE('20/03/2024','DD-MM-YYYY'), '819');
+INSERT INTO UTAKMICE VALUES (30, 28, '80:65', 'Erić Nenad', 350,TO_DATE('21/03/2024','DD-MM-YYYY'), '820');
+INSERT INTO UTAKMICE VALUES (25, 30, '48:75', 'Vlahović Zoran', 50,TO_DATE('22/03/2024','DD-MM-YYYY'), '821');
+INSERT INTO UTAKMICE VALUES (31, 29, '86:70', 'Manojlović Dušan', 850,TO_DATE('23/03/2024','DD-MM-YYYY'), '822');
+INSERT INTO UTAKMICE VALUES (33, 31, '84:94', 'Ilić Dragutin', 800,TO_DATE('24/03/2024','DD-MM-YYYY'), '823');
+INSERT INTO UTAKMICE VALUES (32, 24, '78:74', 'Tasić Milan', 500,TO_DATE('25/03/2024','DD-MM-YYYY'), '824');
+INSERT INTO UTAKMICE VALUES (29, 32, '104:72', 'Dostanić Momčilo', 1000,TO_DATE('26/03/2024','DD-MM-YYYY'), '825');
+INSERT INTO UTAKMICE VALUES (33, 23, '101:92', 'Stojanović Milan', 500,TO_DATE('27/03/2024','DD-MM-YYYY'), '826');
+INSERT INTO UTAKMICE VALUES (23, 33, '94:79', 'Markoski Branko', 300,TO_DATE('28/03/2024','DD-MM-YYYY'), '827');
+INSERT INTO UTAKMICE VALUES (34, 26, '99:76', 'Todorović Slobodan', 750,TO_DATE('29/03/2024','DD-MM-YYYY'), '828');
+INSERT INTO UTAKMICE VALUES (30, 34, '65:68', 'Manojlović Dušan', 500,TO_DATE('30/03/2024','DD-MM-YYYY'), '829');
+INSERT INTO UTAKMICE VALUES (35, 28, '94:82', 'Vlahović Zoran', 800,TO_DATE('31/03/2024','DD-MM-YYYY'), '830');
+INSERT INTO UTAKMICE VALUES (24, 35, '92:78', 'Vlahović Zoran', 200,TO_DATE('01/04/2024','DD-MM-YYYY'), '831');
+
+~STAT_I_NA_U~
+INSERT INTO STAT_I_NA_U VALUES (10001,3, '1/2', '50', '1/1', '100', '0/0', '0', '1/1', '100', '0/0', '0/0', '0', 4, '222005', 20);
+INSERT INTO STAT_I_NA_U VALUES (10002,8, '0/0', '0', '1/2', '50', '2/5', '40', '3/7', '42.9', '5/3', '0/1', '2', 19, '123074', 20);
+INSERT INTO STAT_I_NA_U VALUES (10003,17, '3/4', '75', '7/12', '58.3', '0/1', '0', '7/13', '53.8', '1/0', '1/3', '5', 25, '455603071', 20);
+INSERT INTO STAT_I_NA_U VALUES (10004,7, '1/2', '50', '3/3', '100', '0/4', '0', '3/7', '42.9', '1/3', '0/0', '1', 20, '503208011', 20);
+INSERT INTO STAT_I_NA_U VALUES (10005,0, '0/0', '0', '0/1', '0', '0/0', '0', '0/1', '0', '0/1', '0/1', '0', 5, '438314016', 20);
+INSERT INTO STAT_I_NA_U VALUES (10006,7, '2/2', '100', '1/1', '100', '1/2', '50', '2/3', '66.7', '2/4', '1/0', '0', 15, '400901198', 20);
+INSERT INTO STAT_I_NA_U VALUES (10007,6, '0/0', '0', '0/2', '0', '2/3', '66.7', '2/5', '40', '0/0', '1/0', '4', 21, '123039', 20);
+INSERT INTO STAT_I_NA_U VALUES (10008,17, '2/4', '50', '6/7', '85.7', '1/1', '100', '7/8', '87.5', '3/9', '1/0', '4', 30, '407710017', 20);
+INSERT INTO STAT_I_NA_U VALUES (10009,6, '0/0', '0', '3/4', '75', '0/1', '0', '3/5', '60', '0/1', '1/2', '1', 20, '116028', 20);
+INSERT INTO STAT_I_NA_U VALUES (10010, 7, '2/2', '100', '1/2', '50', '1/5', '20', '2/7', '28.6', '0/2', '0/2', '4', 22, '123040', 20);
+INSERT INTO STAT_I_NA_U VALUES (10011, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 3, '606405008', 20);
+INSERT INTO STAT_I_NA_U VALUES (10012, 20, '7/8', '87.5', '5/5', '100', '1/1', '100', '6/6', '100', '0/4', '0/1', '0', 16, '140515018', 20);
+INSERT INTO STAT_I_NA_U VALUES (10013, 0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/0', '0/0', '0',5, '706110026', 20);
+INSERT INTO STAT_I_NA_U VALUES (10014, 7, '0/0', '0', '2/4', '50', '1/1', '100', '3/5', '60', '1/5', '1/1', '1', 23, '433914003', 20);
+INSERT INTO STAT_I_NA_U VALUES (10015, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '116029', 20);
+INSERT INTO STAT_I_NA_U VALUES (10016, 14, '6/6', '100', '4/8', '50', '0/3', '0', '4/11', '36.4', '0/0', '0/2', '3', 33, '405709003', 20);
+INSERT INTO STAT_I_NA_U VALUES (10017, 0, '0/0', '0', '0/3', '0', '0/0', '0', '0/3', '0', '0/1', '0/1', '0',30, '828110012', 20);
+INSERT INTO STAT_I_NA_U VALUES (10018, 16, '0/0', '0', '2/2', '100', '4/5', '80', '6/7', '85.7', '0/1', '1/2', '1',26, '408709012', 20);
+INSERT INTO STAT_I_NA_U VALUES (10019, 20, '9/9', '100', '4/5', '80', '1/5', '20', '5/10', '50', '0/3', '1/0', '1',26, '223708009', 20);
+INSERT INTO STAT_I_NA_U VALUES (10020, 12, '2/2', '100', '5/10', '50', '0/0', '0', '5/10', '50', '0/3', '1/1', '0', 17, '604816013', 20);
+INSERT INTO STAT_I_NA_U VALUES (10021, 9, '2/3', '66.7', '2/3', '66.7', '1/2', '50', '3/5', '60', '0/1', '2/0', '0', 17, '557113015', 20);
+INSERT INTO STAT_I_NA_U VALUES (10022, 12, '0/1', '0', '6/8', '75', '0/2', '0', '6/10', '60', '3/1', '0/0', '1',23, '600607001', 20);
+INSERT INTO STAT_I_NA_U VALUES (10023, 4, '0/0', '0', '2/2', '100', '0/1', '0', '2/3', '66.7', '1/1', '0/1', '0', 17, '506812002', 30);
+INSERT INTO STAT_I_NA_U VALUES (10024, 12, '6/8', '75', '3/4', '75', '0/2', '0', '3/6', '50', '1/5', '1/1', '1', 20, '432808024', 30);
+INSERT INTO STAT_I_NA_U VALUES (10025, 2, '0/0', '0', '1/3', '33.3', '0/1', '0', '1/4', '25', '1/1', '0/0', '0', 14, '600510009', 30);
+INSERT INTO STAT_I_NA_U VALUES (10026, 11, '0/2', '0', '4/7', '57.1', '1/5', '20', '5/12', '41.7', '0/4', '1/2', '4', 22, '601201167', 30);
+INSERT INTO STAT_I_NA_U VALUES (10027, 5, '0/0', '0', '1/3', '33.3', '1/4', '25', '2/7', '28.6', '0/2', '0/2', '0', 22, '213005', 30);
+INSERT INTO STAT_I_NA_U VALUES (10028, 2, '0/0', '0', '1/2', '50', '0/0', '0', '1/2', '50', '0/1', '0/2', '0', 16, '642401169', 30);
+INSERT INTO STAT_I_NA_U VALUES (10029, 10, '6/8', '75', '2/4', '50', '0/0', '0', '2/4', '50', '3/2', '1/1', '1', 13, '105118001', 30);
+INSERT INTO STAT_I_NA_U VALUES (10030, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0',0, '431898035', 30);
+INSERT INTO STAT_I_NA_U VALUES (10031, 12, '5/5', '100', '2/5', '40', '1/3', '33.3', '3/8', '37.5', '1/3', '1/1', '1', 17, '452805009', 30);
+INSERT INTO STAT_I_NA_U VALUES (10032, 8, '2/4', '50', '0/0', '0', '2/3', '66.7', '2/3', '66.7', '1/2', '0/2', '2', 19, '642417047', 30);
+INSERT INTO STAT_I_NA_U VALUES (10033, 0, '0/0', '0', '0/1', '0', '0/0', '0', '0/1', '0', '0/0', '0/0', '0',4, '222005', 30);
+INSERT INTO STAT_I_NA_U VALUES (10034, 3, '1/2', '50', '1/2', '50', '0/3', '0', '1/5', '20', '0/2', '0/1', '1', 19, '123074', 30);
+INSERT INTO STAT_I_NA_U VALUES (10035, 11, '1/2', '50', '2/5', '40', '2/3', '66.7', '4/8', '50', '0/2', '2/2', '3', 21, '455603071', 30);
+INSERT INTO STAT_I_NA_U VALUES (10036, 9, '4/4', '100', '1/3', '33.3', '1/3', '33.3', '2/6', '33.3', '1/1', '1/1', '1', 18, '503208011', 30);
+INSERT INTO STAT_I_NA_U VALUES (10037, 2, '0/0', '0', '1/1', '100', '0/1', '0', '1/2', '50', '0/1', '1/1', '0', 8, '438314016', 30);
+INSERT INTO STAT_I_NA_U VALUES (10038, 5, '0/0', '0', '1/1', '100', '1/3', '33.3', '2/4', '50', '2/2', '0/0', '1', 21, '400901198', 30);
+INSERT INTO STAT_I_NA_U VALUES (10039, 11, '2/2', '100', '0/2', '0', '3/6', '50', '3/8', '37.5', '0/0', '1/3', '5',25, '123039', 30);
+INSERT INTO STAT_I_NA_U VALUES (10040, 13, '1/3', '33.3', '6/6', '100', '0/2', '0', '6/8', '75', '1/8', '2/2', '0', 24, '407710017', 30);
+INSERT INTO STAT_I_NA_U VALUES (10041, 0, '0/0', '0', '0/1', '0', '0/1', '0', '0/2', '0', '1/4', '0/2', '0',19, '123040', 30);
+INSERT INTO STAT_I_NA_U VALUES (10042, 17, '3/3', '100', '4/6', '66.7', '2/5', '40', '6/11', '54.5', '1/3', '2/1', '3', 21, '606405008', 30);
+INSERT INTO STAT_I_NA_U VALUES (10043, 9, '1/3', '33.3', '4/5', '80', '0/1', '0', '4/6', '66.7', '0/2', '1/0', '0', 18, '140515018', 30);
+INSERT INTO STAT_I_NA_U VALUES (10044, 14, '5/5', '100', '3/4', '75', '1/5', '20', '4/9', '44.4', '0/6', '0/0', '2', 25, '602210016', 21);
+INSERT INTO STAT_I_NA_U VALUES (10045, 10, '3/3', '100', '2/2', '100', '1/2', '50', '3/4', '75', '1/1', '0/0', '3',10, '455603014', 21);
+INSERT INTO STAT_I_NA_U VALUES (10046, 0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/0', '1/0', '1',5, '404712007', 21);
+INSERT INTO STAT_I_NA_U VALUES (10047, 6, '0/0', '0', '3/4', '75', '0/0', '0', '3/4', '75', '0/4', '1/0', '1',24, '734613005', 21);
+INSERT INTO STAT_I_NA_U VALUES (10048, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '606402515', 21);
+INSERT INTO STAT_I_NA_U VALUES (10049, 12, '2/2', '100', '2/2', '100', '2/5', '40', '4/7', '57.1', '4/3', '2/2', '4', 22, '107203013', 21);
+INSERT INTO STAT_I_NA_U VALUES (10050, 6, '1/2', '50', '1/2', '50', '1/3', '33.3', '2/5', '40', '2/2', '2/1', '1', 28, '459410015', 21);
+INSERT INTO STAT_I_NA_U VALUES (10051, 0, '0/0', '0', '0/2', '0', '0/3', '0', '0/5', '0', '1/3', '0/2', '0',14, '235115001', 21);
+INSERT INTO STAT_I_NA_U VALUES (10052, 11, '3/5', '60', '4/8', '50', '0/0', '0', '4/8', '50', '2/3', '0/0', '1', 15, '465403022', 21);
+INSERT INTO STAT_I_NA_U VALUES (10053, 0, '0/1', '0', '0/1', '0', '0/2', '0', '0/3', '0', '0/0', '1/2', '2', 16, '205007', 21);
+INSERT INTO STAT_I_NA_U VALUES (10054, 4, '1/2', '50', '0/0', '0', '1/5', '20', '1/5', '20', '0/3', '2/1', '3', 14, '224403015', 21);
+INSERT INTO STAT_I_NA_U VALUES (10055, 20, '6/9', '66.7', '7/9', '77.8', '0/5', '0', '7/14', '50', '0/8', '0/0', '0', 27, '105010012', 21);
+INSERT INTO STAT_I_NA_U VALUES (10056, 12, '5/7', '71.4', '2/6', '33.3', '1/4', '25', '3/10', '30', '0/3', '0/1', '1', 21, '123096', 21);
+INSERT INTO STAT_I_NA_U VALUES (10057, 13, '8/8', '100', '1/3', '33.3', '1/4', '25', '2/7', '28.6', '0/0', '0/2', '0', 27, '160810011', 21);
+INSERT INTO STAT_I_NA_U VALUES (10058, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0',0, '264706004', 21);
+INSERT INTO STAT_I_NA_U VALUES (10059, 14, '1/2', '50', '2/3', '66.7', '3/9', '33.3', '5/12', '41.7', '2/4', '0/1', '4', 27, '140798005', 21);
+INSERT INTO STAT_I_NA_U VALUES (10060, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '800505002', 21);
+INSERT INTO STAT_I_NA_U VALUES (10061, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/1', '1/0', '0',7, '301617004', 21);
+INSERT INTO STAT_I_NA_U VALUES (10062, 0, '0/0', '0', '0/0', '0', '0/3', '0', '0/3', '0', '1/0', '0/2', '0', 11, '103614039', 21);
+INSERT INTO STAT_I_NA_U VALUES (10063, 7, '1/3', '33.3', '0/1', '0', '2/5', '40', '2/6', '33.3', '0/6', '1/2', '0', 32, '601908007', 21);
+INSERT INTO STAT_I_NA_U VALUES (10064, 13, '6/8', '75', '2/7', '28.6', '1/1', '100', '3/8', '37.5', '2/3', '2/1', '2', 22, '118074', 21);
+INSERT INTO STAT_I_NA_U VALUES (10065, 9, '0/1', '0', '3/4', '75', '1/4', '25', '4/8', '50', '0/5', '1/0', '0', 37, '123050', 21);
+INSERT INTO STAT_I_NA_U VALUES (10066, 4, '2/5', '40', '1/2', '50', '0/2', '0', '1/4', '25', '3/0', '0/1', '0', 10, '112504021', 21);
+INSERT INTO STAT_I_NA_U VALUES (10067, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '160810011', 22);
+INSERT INTO STAT_I_NA_U VALUES (10068, 7, '0/0', '0', '2/2', '100', '1/2', '50', '3/4', '75', '0/3', '0/0', '0', 16, '264706004', 22);
+INSERT INTO STAT_I_NA_U VALUES (10069, 9, '4/4', '100', '1/3', '33.3', '1/5', '20', '2/8', '25', '0/5', '2/3', '7', 29, '140798005', 22);
+INSERT INTO STAT_I_NA_U VALUES (10070, 30, '3/3', '100', '9/9', '100', '3/11', '27.3', '12/20', '60', '2/3', '3/3', '5', 36, '800505002', 22);
+INSERT INTO STAT_I_NA_U VALUES (10071, 3, '0/0', '0', '0/0', '0', '1/3', '33.3', '1/3', '33.3', '0/2', '1/0', '0', 21, '301617004', 22);
+INSERT INTO STAT_I_NA_U VALUES (10072, 5, '0/0', '0', '1/4', '25', '1/3', '33.3', '2/7', '28.6', '1/0', '1/1', '1', 20, '103614039', 22);
+INSERT INTO STAT_I_NA_U VALUES (10073, 11, '0/0', '0', '1/1', '100', '3/5', '60', '4/6', '66.7', '2/2', '0/0', '0', 19, '601908007', 22);
+INSERT INTO STAT_I_NA_U VALUES (10074, 16, '1/2', '50', '6/10', '60', '1/3', '33.3', '7/13', '53.8', '1/5', '0/1', '2', 42, '123050', 22);
+INSERT INTO STAT_I_NA_U VALUES (10075, 7, '5/8', '62.5', '1/8', '12.5', '0/2', '0', '1/10', '10', '3/2', '0/3', '2', 26, '112504021', 22);
+INSERT INTO STAT_I_NA_U VALUES (10076, 10, '3/4', '75', '2/2', '100', '1/4', '25', '3/6', '50', '0/0', '1/4', '6', 24, '455603014', 22);
+INSERT INTO STAT_I_NA_U VALUES (10077, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '734613005', 22);
+INSERT INTO STAT_I_NA_U VALUES (10078, 6, '3/4', '75', '0/5', '0', '1/5', '20', '1/10', '10', '1/2', '0/2', '2', 31, '606402515', 22);
+INSERT INTO STAT_I_NA_U VALUES (10079, 13, '4/4', '100', '0/2', '0', '3/7', '42.9', '3/9', '33.3', '1/1', '2/1', '2', 25, '459410015', 22);
+INSERT INTO STAT_I_NA_U VALUES (10080, 0, '0/0', '0', '0/1', '0', '0/2', '0', '0/3', '0', '0/4', '0/0', '1', 18, '235115001', 22);
+INSERT INTO STAT_I_NA_U VALUES (10081, 8, '4/6', '66.7', '2/4', '50', '0/0', '0', '2/4', '50', '1/3', '1/0', '3', 18, '649203033', 22);
+INSERT INTO STAT_I_NA_U VALUES (10082, 20, '6/8', '75', '7/14', '50', '0/1', '0', '7/15', '46.7', '4/5', '1/3', '1', 31, '465403022', 22);
+INSERT INTO STAT_I_NA_U VALUES (10083, 6, '0/0', '0', '0/1', '0', '2/3', '66.7', '2/4', '50', '0/4', '1/2', '1', 27, '224403015', 22);
+INSERT INTO STAT_I_NA_U VALUES (10084, 3, '0/0', '0', '0/0', '0', '1/3', '33.3', '1/3', '33.3', '1/1', '0/0', '0', 17, '601801133', 22);
+INSERT INTO STAT_I_NA_U VALUES (10085, 21, '5/6', '83.3', '5/5', '100', '2/4', '50', '7/9', '77.8', '2/8', '1/4', '2', 34, '105010012', 22);
+INSERT INTO STAT_I_NA_U VALUES (10086,2,'2/2', '100', '0/2', '0', '0/1', '0', '0/3', '0', '0/1', '0/0', '0', 14, '123096', 22);
+INSERT INTO STAT_I_NA_U VALUES (10087,12,'5/5', '100', '2/3', '66.7', '1/2', '50', '3/5', '60', '2/3', '0/0', '1', 24, '160810011', 22);
+INSERT INTO STAT_I_NA_U VALUES (10088,0,'0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '140515005', 22);
+INSERT INTO STAT_I_NA_U VALUES (10089,3,'0/0', '0', '0/0', '0', '1/1', '100', '1/1', '100', '0/0', '0/0', '0', 11, '264706004', 22);
+INSERT INTO STAT_I_NA_U VALUES (10090,20,'3/7', '42.9', '4/8', '50', '3/4', '75', '7/12', '58.3', '1/7', '1/2', '3', 28, '800505002', 22);
+INSERT INTO STAT_I_NA_U VALUES (10091,3,'0/0', '0', '0/0', '0', '1/1', '100', '1/1', '100', '0/2', '0/0', '0', 7, '301617004', 22);
+INSERT INTO STAT_I_NA_U VALUES (10092,0,'0/2', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 8, '103614039', 22);
+INSERT INTO STAT_I_NA_U VALUES (10093,12,'5/7', '71.4', '2/5', '40', '1/4', '25', '3/9', '33.3', '2/0', '0/1', '3', 30, '601908007', 22);
+INSERT INTO STAT_I_NA_U VALUES (10094,8,'4/5', '80', '2/7', '28.6', '0/1', '0', '2/8', '25', '2/7', '1/0', '5', 25, '118074', 22);
+INSERT INTO STAT_I_NA_U VALUES (10095,10,'0/0', '0', '2/3', '66.7', '2/5', '40', '4/8', '50', '1/3', '0/2', '2', 17, '218001', 22);
+INSERT INTO STAT_I_NA_U VALUES (10096,4,'0/0', '0', '2/5', '40', '0/3', '0', '2/8', '25', '2/2', '1/0', '2', 22, '123050', 22);
+INSERT INTO STAT_I_NA_U VALUES (10097,9,'1/2', '50', '4/6', '66.7', '0/2', '0', '4/8', '50', '2/0', '0/1', '1', 14, '112504021', 22);
+INSERT INTO STAT_I_NA_U VALUES (10098,5,'0/0', '0', '1/4', '25', '1/3', '33.3', '2/7', '28.6', '1/2', '0/1', '4', 23, '734615039', 22);
+INSERT INTO STAT_I_NA_U VALUES (10099,7,'2/4', '50', '1/2', '50', '1/2', '50', '2/4', '50', '0/1', '1/1', '1', 18, '432815005', 22);
+INSERT INTO STAT_I_NA_U VALUES (10100,9,'1/2', '50', '1/7', '14.3', '2/4', '50', '3/11', '27.3', '3/1', '0/0', '5', 27, '513703024', 22);
+INSERT INTO STAT_I_NA_U VALUES (10101,0,'0/0', '0', '0/2', '0', '0/2', '0', '0/4', '0', '0/2', '0/1', '2', 11, '405711034', 25);
+INSERT INTO STAT_I_NA_U VALUES (10102,9,'1/2', '50', '4/6', '66.7', '0/1', '0', '4/7', '57.1', '1/6', '1/0', '4', 25, '452805009', 25);
+INSERT INTO STAT_I_NA_U VALUES (10103,0,'0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '750315107', 25);
+INSERT INTO STAT_I_NA_U VALUES (10104,13,'0/0', '0', '2/8', '25', '3/11', '27.3', '5/19', '26.3', '2/2', '0/1', '1', 30, '469908017', 25);
+INSERT INTO STAT_I_NA_U VALUES (10105,0,'0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '431898038', 25);
+INSERT INTO STAT_I_NA_U VALUES (10106,3,'1/2', '50', '1/2', '50', '0/0', '0', '1/2', '50', '2/3', '1/0', '1', 13, '103614022', 25);
+INSERT INTO STAT_I_NA_U VALUES (10119, 4, '2/2', '100', '1/2', '50', '0/2', '0', '1/4', '25', '0/2', '2/1', '1', 15, '603415008', 23);
+INSERT INTO STAT_I_NA_U VALUES (10120, 10, '3/3', '100', '2/2', '100', '1/2', '50', '3/4', '75', '0/1', '0/2', '2', 23, '400100233', 23);
+INSERT INTO STAT_I_NA_U VALUES (10121, 4, '2/2', '100', '1/2', '50', '0/4', '0', '1/6', '16.7', '1/1', '1/0', '0', 23, '432801064', 23);
+INSERT INTO STAT_I_NA_U VALUES (10122, 11, '8/8', '100', '0/1', '0', '1/4', '25', '1/5', '20', '0/3', '0/0', '0', 27, '165704003', 23);
+INSERT INTO STAT_I_NA_U VALUES (10123, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 1, '302418006', 23);
+INSERT INTO STAT_I_NA_U VALUES (10124, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 1, '302416008', 23);
+INSERT INTO STAT_I_NA_U VALUES (10125, 16, '3/3', '100', '5/7', '71.4', '1/3', '33.3', '6/10', '60', '1/2', '1/2', '1', 28, '123055', 23);
+INSERT INTO STAT_I_NA_U VALUES (10126, 20, '7/11', '63.6', '5/13', '38.5', '1/3', '33.3', '6/16', '37.5', '3/9', '2/3', '1', 32, '545100103', 23);
+INSERT INTO STAT_I_NA_U VALUES (10127, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/1', '0/0', '0', 8, '603417007', 23);
+INSERT INTO STAT_I_NA_U VALUES (10128, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/1', '0/0', '0', 1, '302411008', 23);
+INSERT INTO STAT_I_NA_U VALUES (10129, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '2/1', '0/1', '0', 8, '706110026', 23);
+INSERT INTO STAT_I_NA_U VALUES (10130, 17, '3/5', '60', '4/7', '57.1', '2/7', '28.6', '6/14', '42.9', '2/8', '1/2', '0', 27, '433914003', 23);
+INSERT INTO STAT_I_NA_U VALUES (10131, 0, '0/0', '0', '0/1', '0', '0/1', '0', '0/2', '0', '1/0', '0/0', '0', 13, '116029', 23);
+INSERT INTO STAT_I_NA_U VALUES (10132, 9, '1/2', '50', '4/7', '57.1', '0/7', '0', '4/14', '28.6', '1/0', '0/4', '7', 33, '405709003', 23);
+INSERT INTO STAT_I_NA_U VALUES (10133, 11, '0/0', '0', '1/3', '33.3', '3/7', '42.9', '4/10', '40', '0/1', '0/0', '1', 33, '828110012', 23);
+INSERT INTO STAT_I_NA_U VALUES (10134, 6, '4/4', '100', '1/1', '100', '0/4', '0', '1/5', '20', '0/2', '2/1', '1', 17, '408709012', 23);
+INSERT INTO STAT_I_NA_U VALUES (10135, 15, '2/3', '66.7', '5/9', '55.6', '1/3', '33.3', '6/12', '50', '1/10', '1/2', '1', 30, '223708009',23);
+INSERT INTO STAT_I_NA_U VALUES (10136, 6, '2/2', '100', '2/3', '66.7', '0/2', '0', '2/5', '40', '2/1', '1/1', '0', 11, '604816013', 23);
+INSERT INTO STAT_I_NA_U VALUES (10137, 5, '1/1', '100', '2/2', '100', '0/0', '0', '2/2', '100', '0/0', '0/1', '0', 10, '557113015', 23);
+INSERT INTO STAT_I_NA_U VALUES (10138, 4, '0/1', '0', '2/6', '33.3', '0/1', '0', '2/7', '28.6', '1/6', '0/1', '1', 18, '600607001', 23);
+INSERT INTO STAT_I_NA_U VALUES (10139, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '302814008', 32);
+INSERT INTO STAT_I_NA_U VALUES (10140, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '724708008', 32);
+INSERT INTO STAT_I_NA_U VALUES (10141, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '302819018', 32);
+INSERT INTO STAT_I_NA_U VALUES (10142, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '601113009', 32);
+INSERT INTO STAT_I_NA_U VALUES (10143, 17, '0/0', '0', '7/10', '70', '1/2', '50', '8/12', '66.7', '0/3', '0/0', '0', 31, '122072', 32);
+INSERT INTO STAT_I_NA_U VALUES (10144, 6, '1/3', '33.3', '1/1', '100', '1/1', '100', '2/2', '100', '2/1', '1/1', '1', 17, '506308005', 32);
+INSERT INTO STAT_I_NA_U VALUES (10145, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '601118025', 32);
+INSERT INTO STAT_I_NA_U VALUES (10146, 16, '2/2', '100', '4/7', '57.1', '2/7', '28.6', '6/14', '42.9', '0/7', '0/8', '2', 32, '123062', 32);
+INSERT INTO STAT_I_NA_U VALUES (10147, 10, '1/2', '50', '3/7', '42.9', '1/3', '33.3', '4/10', '40', '1/11', '0/2', '2', 33, '123061', 32);
+INSERT INTO STAT_I_NA_U VALUES (10148, 18, '5/5', '100', '2/8', '25', '3/4', '75', '5/12', '41.7', '1/4', '3/5', '5', 31, '302111025', 32);
+INSERT INTO STAT_I_NA_U VALUES (10149, 8, '1/2', '50', '2/3', '66.7', '1/4', '25', '3/7', '42.9', '2/1', '1/4', '3', 38, '603214001', 32);
+INSERT INTO STAT_I_NA_U VALUES (10150, 5, '0/0', '0', '1/6', '16.7', '1/3', '33.3', '2/9', '22.2', '2/0', '4/1', '5', 24, '603415008', 32);
+INSERT INTO STAT_I_NA_U VALUES (10151, 29, '2/2', '100', '12/17', '70.6', '1/2', '50', '13/19', '68.4', '1/6', '5/1', '2', 32, '122018', 32);
+INSERT INTO STAT_I_NA_U VALUES (10152, 7, '3/4', '75', '2/5', '40', '0/0', '0', '2/5', '40', '1/3', '0/2', '1', 22, '400100233', 32);
+INSERT INTO STAT_I_NA_U VALUES (10153, 4, '1/2', '50', '0/1', '0', '1/11', '9.1', '1/12', '8.3', '2/4', '2/0', '5', 26, '432801064', 32);
+INSERT INTO STAT_I_NA_U VALUES (10154, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '123078', 32);
+INSERT INTO STAT_I_NA_U VALUES (10155, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '302416008', 32);
+INSERT INTO STAT_I_NA_U VALUES (10156, 10, '0/0', '0', '5/7', '71.4', '0/5', '0', '5/12', '41.7', '1/1', '1/2', '2', 26, '123055', 32);
+INSERT INTO STAT_I_NA_U VALUES (10157, 5, '1/2', '50', '2/3', '66.7', '0/2', '0', '2/5', '40', '1/3', '1/1', '0', 20, '401507003', 32);
+INSERT INTO STAT_I_NA_U VALUES (10158, 19, '5/10', '50', '7/8', '87.5', '0/6', '0', '7/14', '50', '3/8', '2/4', '1', 38, '545100103', 32);
+INSERT INTO STAT_I_NA_U VALUES (10159, 6, '0/0', '0', '0/1', '0', '2/5', '40', '2/6', '33.3', '1/1', '1/0', '0', 12, '603417007', 32);
+INSERT INTO STAT_I_NA_U VALUES (10160, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '302411008', 32);
+INSERT INTO STAT_I_NA_U VALUES (10161, 4, '2/4', '50', '1/2', '50', '0/1', '0', '1/3', '33.3', '2/1', '2/1', '2', 15, '406515004', 24);
+INSERT INTO STAT_I_NA_U VALUES (10162, 7, '3/4', '75', '2/7', '28.6', '0/0', '0', '2/7', '28.6', '3/3', '0/0', '0', 17, '439810018', 24);
+INSERT INTO STAT_I_NA_U VALUES (10163, 26, '8/12', '66.7', '3/3', '100', '4/6', '66.7', '7/9', '77.8', '0/5', '0/1', '4', 26, '630216053', 24);
+INSERT INTO STAT_I_NA_U VALUES (10164, 18, '3/3', '100', '3/6', '50', '3/6', '50', '6/12', '50', '1/8', '1/1', '4', 39, '402617004', 24);
+INSERT INTO STAT_I_NA_U VALUES (10165, 11, '3/4', '75', '1/1', '100', '2/7', '28.6', '3/8', '37.5', '1/0', '1/1', '2', 34, '122082', 24);
+INSERT INTO STAT_I_NA_U VALUES (10166, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 2, '431814019', 24);
+INSERT INTO STAT_I_NA_U VALUES (10167, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '438314009', 24);
+INSERT INTO STAT_I_NA_U VALUES (10168, 2, '0/0', '0', '1/2', '50', '0/1', '0', '1/3', '33.3', '0/2', '0/0', '0', 12, '411210004', 24);
+INSERT INTO STAT_I_NA_U VALUES (10169, 12, '4/4', '100', '1/4', '25', '2/3', '66.7', '3/7', '42.9', '2/1', '0/3', '0', 19, '302814003', 24);
+INSERT INTO STAT_I_NA_U VALUES (10170, 19, '4/6', '66.7', '3/3', '100', '3/12', '25', '6/15', '40', '0/4', '2/3', '3', 34, '401506024', 24);
+INSERT INTO STAT_I_NA_U VALUES (10171, 6, '4/8', '50', '1/1', '100', '0/5', '0', '1/6', '16.7', '0/1', '0/3', '6', 27, '348014035', 24);
+INSERT INTO STAT_I_NA_U VALUES (10172, 28, '10/12', '83.3', '9/13', '69.2', '0/3', '0', '9/16', '56.3', '0/3', '2/2', '4', 35, '123081', 24);
+INSERT INTO STAT_I_NA_U VALUES (10173, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '155515006', 24);
+INSERT INTO STAT_I_NA_U VALUES (10174, 24, '4/4', '100', '1/1', '100', '6/11', '54.5', '7/12', '58.3', '0/2', '1/1', '0', 29, '606904001', 24);
+INSERT INTO STAT_I_NA_U VALUES (10175, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '734514007', 24);
+INSERT INTO STAT_I_NA_U VALUES (10176, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '315014010', 24);
+INSERT INTO STAT_I_NA_U VALUES (10177, 16, '3/5', '60', '2/3', '66.7', '3/6', '50', '5/9', '55.6', '0/4', '2/2', '3', 29, '401506016', 24);
+INSERT INTO STAT_I_NA_U VALUES (10178, 3, '0/0', '0', '0/0', '0', '1/1', '100', '1/1', '100', '0/0', '0/0', '0', 9, '728307011', 24);
+INSERT INTO STAT_I_NA_U VALUES (10179, 7, '1/4', '25', '3/5', '60', '0/1', '0', '3/6', '50', '0/1', '0/1', '2', 22, '348012007', 24);
+INSERT INTO STAT_I_NA_U VALUES (10180, 12, '6/6', '100', '3/4', '75', '0/2', '0', '3/6', '50', '0/1', '0/3', '0', 13, '122039', 24);
+INSERT INTO STAT_I_NA_U VALUES (10181, 16, '4/5', '80', '3/5', '60', '2/3', '66.7', '5/8', '62.5', '1/7', '3/3', '5', 36, '123054', 24);
+INSERT INTO STAT_I_NA_U VALUES (10182, 2, '0/0', '0', '1/1', '100', '0/2', '0', '1/3', '33.3', '1/6', '1/3', '4', 29, '220012', 24);
+INSERT INTO STAT_I_NA_U VALUES (10183, 11, '2/2', '100', '3/6', '50', '1/4', '25', '4/10', '40', '1/1', '1/1', '5', 27, '734615039', 25);
+INSERT INTO STAT_I_NA_U VALUES (10184, 10, '1/2', '50', '3/3', '100', '1/3', '33.3', '4/6', '66.7', '2/2', '0/2', '1', 19, '405015048', 25);
+INSERT INTO STAT_I_NA_U VALUES (10185, 14, '3/4', '75', '4/5', '80', '1/3', '33.3', '5/8', '62.5', '0/2', '4/0', '2', 24, '432815005', 25);
+INSERT INTO STAT_I_NA_U VALUES (10186, 22, '0/0', '0', '8/12', '66.7', '2/4', '50', '10/16', '62.5', '0/2', '1/0', '4', 25, '405711034', 25);
+INSERT INTO STAT_I_NA_U VALUES (10187, 7, '0/0', '0', '2/4', '50', '1/1', '100', '3/5', '60', '1/2', '2/2', '2', 18, '123073', 25);
+INSERT INTO STAT_I_NA_U VALUES (10188, 6, '2/4', '50', '2/3', '66.7', '0/2', '0', '2/5', '40', '2/4', '0/2', '2', 24, '103311004', 25);
+INSERT INTO STAT_I_NA_U VALUES (10189, 0, '0/0', '0', '0/1', '0', '0/2', '0', '0/3', '0', '0/2', '0/2', '0', 6, '750315107', 25);
+INSERT INTO STAT_I_NA_U VALUES (10190, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '416118003', 25);
+INSERT INTO STAT_I_NA_U VALUES (10191, 3, '1/3', '33.3', '1/1', '100', '0/0', '0', '1/1', '100', '1/0', '2/2', '2', 13, '431898038', 25);
+INSERT INTO STAT_I_NA_U VALUES (10192, 19, '1/1', '100', '3/4', '75', '4/5', '80', '7/9', '77.8', '2/6', '0/0', '1', 21, '103614022', 25);
+INSERT INTO STAT_I_NA_U VALUES (10193, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '606412001', 25);
+INSERT INTO STAT_I_NA_U VALUES (10194, 10, '2/3', '66.7', '4/6', '66.7', '0/1', '0', '4/7', '57.1', '3/5', '0/1', '3', 23, '123032', 25);
+INSERT INTO STAT_I_NA_U VALUES (10195, 10, '1/2', '50', '3/5', '60', '1/3', '33.3', '4/8', '50', '0/1', '0/3', '2', 14, '802104062', 25);
+INSERT INTO STAT_I_NA_U VALUES (10196, 0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '1/0', '0/0', '1', 14, '869012004', 25);
+INSERT INTO STAT_I_NA_U VALUES (10197, 2, '0/0', '0', '1/3', '33.3', '0/1', '0', '1/4', '25', '0/1', '0/1', '0', 14, '728307011', 25);
+INSERT INTO STAT_I_NA_U VALUES (10198, 18, '5/5', '100', '5/10', '50', '1/3', '33.3', '6/13', '46.2', '3/2', '3/4', '4', 24, '123066', 25);
+INSERT INTO STAT_I_NA_U VALUES (10199, 16, '4/5', '80', '6/9', '66.7', '0/0', '0', '6/9', '66.7', '2/4', '1/1', '0', 17, '802102327', 25);
+INSERT INTO STAT_I_NA_U VALUES (10200, 0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/0', '0/0', '0', 2, '869013016', 25);
+INSERT INTO STAT_I_NA_U VALUES (10201, 3, '1/3', '33.3', '1/3', '33.3', '0/2', '0', '1/5', '20', '3/5', '1/2', '3', 36, '223005', 25);
+INSERT INTO STAT_I_NA_U VALUES (10202, 8, '4/6', '66.7', '2/7', '28.6', '0/2', '0', '2/9', '22.2', '2/3', '1/2', '2', 25, '123064', 25);
+INSERT INTO STAT_I_NA_U VALUES (10203, 11, '0/0', '0', '1/3', '33.3', '3/7', '42.9', '4/10', '40', '0/1', '0/6', '3', 38, '123065', 25);
+INSERT INTO STAT_I_NA_U VALUES (10204, 8, '0/0', '0', '1/2', '50', '2/6', '33.3', '3/8', '37.5', '1/4', '0/1', '1', 20, '169207034', 34);
+INSERT INTO STAT_I_NA_U VALUES (10205, 18, '0/0', '0', '3/7', '42.9', '4/8', '50', '7/15', '46.7', '1/4', '1/1', '4', 36, '123033', 34);
+INSERT INTO STAT_I_NA_U VALUES (10206, 8, '4/5', '80', '2/2', '100', '0/4', '0', '2/6', '33.3', '0/3', '1/0', '5', 29, '502797030', 34);
+INSERT INTO STAT_I_NA_U VALUES (10207, 1, '1/2', '50', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 3, '557004011', 34);
+INSERT INTO STAT_I_NA_U VALUES (10208, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '459412005', 34);
+INSERT INTO STAT_I_NA_U VALUES (10209, 9, '2/2', '100', '2/4', '50', '1/2', '50', '3/6', '50', '0/2', '1/1', '7', 27, '503012004', 34);
+INSERT INTO STAT_I_NA_U VALUES (10210, 11, '5/5', '100', '3/6', '50', '0/1', '0', '3/7', '42.9', '1/1', '1/2', '1', 31, '513699056', 34);
+INSERT INTO STAT_I_NA_U VALUES (10211, 10, '1/1', '100', '3/3', '100', '1/2', '50', '4/5', '80', '2/2', '1/0', '1', 18, '223509015', 34);
+INSERT INTO STAT_I_NA_U VALUES (10212, 2, '0/0', '0', '1/2', '50', '0/0', '0', '1/2', '50', '0/1', '0/0', '0', 8, '642416013', 34);
+INSERT INTO STAT_I_NA_U VALUES (10213, 17, '4/6', '66.7', '5/8', '62.5', '1/3', '33.3', '6/11', '54.5', '0/4', '1/2', '3', 28, '557000024', 34);
+INSERT INTO STAT_I_NA_U VALUES (10214, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '502912009', 34);
+INSERT INTO STAT_I_NA_U VALUES (10215, 13, '2/2', '100', '4/5', '80', '1/1', '100', '5/6', '83.3', '0/5', '1/0', '4', 35, '506812002', 34);
+INSERT INTO STAT_I_NA_U VALUES (10216, 9, '2/4', '50', '2/4', '50', '1/3', '33.3', '3/7', '42.9', '0/1', '0/4', '5', 19, '122084', 34);
+INSERT INTO STAT_I_NA_U VALUES (10217, 0, '0/0', '0', '0/1', '0', '0/1', '0', '0/2', '0', '0/2', '0/2', '0', 11, '600510009', 34);
+INSERT INTO STAT_I_NA_U VALUES (10218, 11, '0/0', '0', '4/8', '50', '1/2', '50', '5/10', '50', '1/0', '1/0', '6', 31, '601201167', 34);
+INSERT INTO STAT_I_NA_U VALUES (10219, 2, '0/0', '0', '1/1', '100', '0/0', '0', '1/1', '100', '0/1', '0/0', '0', 8, '213005', 34);
+INSERT INTO STAT_I_NA_U VALUES (10220, 7, '5/6', '83.3', '1/2', '50', '0/3', '0', '1/5', '20', '0/4', '0/1', '1', 24, '642401169', 34);
+INSERT INTO STAT_I_NA_U VALUES (10221, 3, '1/2', '50', '1/2', '50', '0/0', '0', '1/2', '50', '1/2', '0/2', '0', 10, '105118001', 34);
+INSERT INTO STAT_I_NA_U VALUES (10222, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '431898035', 34);
+INSERT INTO STAT_I_NA_U VALUES (10223, 15, '2/4', '50', '2/5', '40', '3/5', '60', '5/10', '50', '1/5', '2/1', '1', 37, '153404007', 34);
+INSERT INTO STAT_I_NA_U VALUES (10224, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '155515006', 26);
+INSERT INTO STAT_I_NA_U VALUES (10225, 0, '0/0', '0', '0/2', '0', '0/2', '0', '0/4', '0', '1/1', '1/0', '0', 19, '606904001', 26);
+INSERT INTO STAT_I_NA_U VALUES (10226, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '734514007', 26);
+INSERT INTO STAT_I_NA_U VALUES (10227, 11, '2/4', '50', '3/4', '75', '1/2', '50', '4/6', '66.7', '0/1', '1/4', '1', 23, '315014010', 26);
+INSERT INTO STAT_I_NA_U VALUES (10228, 10, '2/4', '50', '4/6', '66.7', '0/2', '0', '4/8', '50', '3/3', '0/1', '0', 16, '401506016', 26);
+INSERT INTO STAT_I_NA_U VALUES (10229, 16, '7/8', '87.5', '0/0', '0', '3/4', '75', '3/4', '75', '0/0', '0/2', '4', 17, '728307011', 26);
+INSERT INTO STAT_I_NA_U VALUES (10230, 20, '4/6', '66.7', '8/10', '80', '0/0', '0', '8/10', '80', '4/0', '0/3', '1', 28, '348012007', 26);
+INSERT INTO STAT_I_NA_U VALUES (10231, 8, '1/2', '50', '2/4', '50', '1/3', '33.3', '3/7', '42.9', '0/2', '0/1', '0', 19, '122039', 26);
+INSERT INTO STAT_I_NA_U VALUES (10232, 10, '4/4', '100', '3/7', '42.9', '0/4', '0', '3/11', '27.3', '0/2', '1/4', '5', 32, '123054', 26);
+INSERT INTO STAT_I_NA_U VALUES (10233, 5, '5/6', '83.3', '0/2', '0', '0/0', '0', '0/2', '0', '2/6', '1/1', '5', 24, '220012', 26);
+INSERT INTO STAT_I_NA_U VALUES (10234, 15, '1/2', '50', '7/10', '70', '0/1', '0', '7/11', '63.6', '2/2', '1/0', '1', 19, '506812002', 26);
+INSERT INTO STAT_I_NA_U VALUES (10235, 6, '1/4', '25', '1/1', '100', '1/2', '50', '2/3', '66.7', '1/3', '0/1', '0', 22, '432808024', 26);
+INSERT INTO STAT_I_NA_U VALUES (10236, 16, '6/7', '85.7', '5/6', '83.3', '0/0', '0', '5/6', '83.3', '1/1', '5/3', '6', 34, '122084', 26);
+INSERT INTO STAT_I_NA_U VALUES (10237, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '600510009', 26);
+INSERT INTO STAT_I_NA_U VALUES (10238, 9, '0/0', '0', '3/5', '60', '1/3', '33.3', '4/8', '50', '0/4', '1/0', '1', 26, '601201167', 26);
+INSERT INTO STAT_I_NA_U VALUES (10239, 7, '2/2', '100', '1/2', '50', '1/1', '100', '2/3', '66.7', '0/1', '1/0', '0', 12, '213005', 26);
+INSERT INTO STAT_I_NA_U VALUES (10240, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '105118001', 26);
+INSERT INTO STAT_I_NA_U VALUES (10241, 6, '0/2', '0', '3/4', '75', '0/0', '0', '3/4', '75', '1/1', '0/0', '1', 7, '431898035', 26);
+INSERT INTO STAT_I_NA_U VALUES (10242, 0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/1', '0/0', '1', 17, '153404007', 26);
+INSERT INTO STAT_I_NA_U VALUES (10243, 9, '5/7', '71.4', '2/5', '40', '0/1', '0', '2/6', '33.3', '4/3', '1/0', '0', 16, '452805009', 26);
+INSERT INTO STAT_I_NA_U VALUES (10244, 16, '2/4', '50', '1/2', '50', '4/5', '80', '5/7', '71.4', '0/2', '2/1', '3', 29, '642417047', 26);
+INSERT INTO STAT_I_NA_U VALUES (10245, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 2, '222717006', 27);
+INSERT INTO STAT_I_NA_U VALUES (10246, 16, '3/3', '100', '5/12', '41.7', '1/3', '33.3', '6/15', '40', '0/2', '0/1', '4', 27, '642410002', 27);
+INSERT INTO STAT_I_NA_U VALUES (10247, 12, '2/4', '50', '2/5', '40', '2/5', '40', '4/10', '40', '3/3', '1/0', '3', 23, '407105024', 27);
+INSERT INTO STAT_I_NA_U VALUES (10248, 12, '0/0', '0', '3/4', '75', '2/4', '50', '5/8', '62.5', '0/0', '3/1', '2', 21, '469911017', 27);
+INSERT INTO STAT_I_NA_U VALUES (10249, 6, '4/4', '100', '1/2', '50', '0/0', '0', '1/2', '50', '0/1', '2/0', '1', 17, '413311018', 27);
+INSERT INTO STAT_I_NA_U VALUES (10250, 5, '2/3', '66.7', '0/1', '0', '1/2', '50', '1/3', '33.3', '1/0', '1/0', '1', 14, '469905024', 27);
+INSERT INTO STAT_I_NA_U VALUES (10251, 18, '7/7', '100', '4/6', '66.7', '1/4', '25', '5/10', '50', '1/4', '2/4', '4', 29, '123043', 27);
+INSERT INTO STAT_I_NA_U VALUES (10252, 10, '2/2', '100', '4/5', '80', '0/0', '0', '4/5', '80', '1/3', '2/0', '0', 22, '513209015', 27);
+INSERT INTO STAT_I_NA_U VALUES (10253, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 1, '202819002', 27);
+INSERT INTO STAT_I_NA_U VALUES (10254, 1, '1/2', '50', '0/2', '0', '0/0', '0', '0/2', '0', '0/0', '0/0', '0', 4, '220006', 27);
+INSERT INTO STAT_I_NA_U VALUES (10255, 5, '0/0', '0', '1/1', '100', '1/1', '100', '2/2', '100', '1/6', '1/2', '2', 31, '123076', 27);
+INSERT INTO STAT_I_NA_U VALUES (10256, 2, '2/2', '100', '0/0', '0', '0/2', '0', '0/2', '0', '0/1', '2/1', '1', 9, '455604092', 27);
+INSERT INTO STAT_I_NA_U VALUES (10257, 13, '5/6', '83.3', '1/2', '50', '2/6', '33.3', '3/8', '37.5', '1/5', '1/3', '1', 27, '602210016', 27);
+INSERT INTO STAT_I_NA_U VALUES (10258, 8, '2/2', '100', '0/0', '0', '2/5', '40', '2/5', '40', '1/0', '1/2', '2', 15, '455603014', 27);
+INSERT INTO STAT_I_NA_U VALUES (10259, 8, '2/4', '50', '3/5', '60', '0/0', '0', '3/5', '60', '3/2', '0/1', '0', 15, '734613005', 27);
+INSERT INTO STAT_I_NA_U VALUES (10260, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/1', '0', 6, '606402515', 27);
+INSERT INTO STAT_I_NA_U VALUES (10261, 4, '0/0', '0', '2/3', '66.7', '0/4', '0', '2/7', '28.6', '1/1', '1/2', '0', 21, '107203013', 27);
+INSERT INTO STAT_I_NA_U VALUES (10262, 9, '2/3', '66.7', '2/5', '40', '1/2', '50', '3/7', '42.9', '3/4', '0/0', '1', 20, '459410015', 27);
+INSERT INTO STAT_I_NA_U VALUES (10263, 4, '2/2', '100', '1/1', '100', '0/0', '0', '1/1', '100', '0/2', '0/1', '1', 7, '235115001', 27);
+INSERT INTO STAT_I_NA_U VALUES (10264, 9, '1/1', '100', '4/7', '57.1', '0/0', '0', '4/7', '57.1', '1/5', '1/0', '1', 25, '465403022', 27);
+INSERT INTO STAT_I_NA_U VALUES (10265, 3, '1/2', '50', '1/5', '20', '0/2', '0', '1/7', '14.3', '2/2', '0/0', '2', 14, '216002', 27);
+INSERT INTO STAT_I_NA_U VALUES (10266, 0, '0/0', '0', '0/1', '0', '0/2', '0', '0/3', '0', '1/0', '1/5', '2', 18, '205007', 27);
+INSERT INTO STAT_I_NA_U VALUES (10267, 2, '0/0', '0', '1/1', '100', '0/1', '0', '1/2', '50', '2/0', '1/2', '1', 7, '224403015', 27);
+INSERT INTO STAT_I_NA_U VALUES (10268, 6, '2/2', '100', '2/3', '66.7', '0/5', '0', '2/8', '25', '2/2', '0/2', '2', 25, '105010012', 27);
+INSERT INTO STAT_I_NA_U VALUES (10269, 2, '0/0', '0', '1/1', '100', '0/1', '0', '1/2', '50', '0/3', '1/0', '1', 15, '614614019', 29);
+INSERT INTO STAT_I_NA_U VALUES (10270, 11, '5/6', '83.3', '3/3', '100', '0/2', '0', '3/5', '60', '1/0', '0/1', '2', 16, '300210023', 29);
+INSERT INTO STAT_I_NA_U VALUES (10271, 4, '2/2', '100', '1/1', '100', '0/3', '0', '1/4', '25', '2/0', '0/0', '0', 15, '600112016', 29);
+INSERT INTO STAT_I_NA_U VALUES (10272, 6, '1/2', '50', '1/3', '33.3', '1/4', '25', '2/7', '28.6', '2/4', '1/1', '3', 23, '603001165', 29);
+INSERT INTO STAT_I_NA_U VALUES (10273, 6, '1/1', '100', '1/2', '50', '1/1', '100', '2/3', '66.7', '0/1', '0/2', '1', 8, '603010016', 29);
+INSERT INTO STAT_I_NA_U VALUES (10274, 12, '1/1', '100', '4/7', '57.1', '1/1', '100', '5/8', '62.5', '1/1', '0/0', '0', 11, '302114004', 29);
+INSERT INTO STAT_I_NA_U VALUES (10275, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '1/2', '2', 12, '123060', 29);
+INSERT INTO STAT_I_NA_U VALUES (10276, 4, '0/0', '0', '2/5', '40', '0/0', '0', '2/5', '40', '1/1', '0/1', '1', 15, '601210020', 29);
+INSERT INTO STAT_I_NA_U VALUES (10277, 5, '1/2', '50', '2/4', '50', '0/1', '0', '2/5', '40', '3/0', '1/0', '0', 16, '300208002', 29);
+INSERT INTO STAT_I_NA_U VALUES (10278, 8, '4/4', '100', '2/6', '33.3', '0/3', '0', '2/9', '22.2', '1/2', '1/1', '0', 28, '661206001', 29);
+INSERT INTO STAT_I_NA_U VALUES (10279, 7, '1/2', '50', '0/1', '0', '2/6', '33.3', '2/7', '28.6', '1/4', '0/0', '1', 27, '603006019', 29);
+INSERT INTO STAT_I_NA_U VALUES (10280, 20, '3/8', '37.5', '7/9', '77.8', '1/3', '33.3', '8/12', '66.7', '2/0', '1/0', '2', 21, '642410002', 29);
+INSERT INTO STAT_I_NA_U VALUES (10281, 2, '0/2', '0', '1/2', '50', '0/1', '0', '1/3', '33.3', '0/3', '0/1', '0', 18, '407105024', 29);
+INSERT INTO STAT_I_NA_U VALUES (10282, 7, '2/2', '100', '1/1', '100', '1/5', '20', '2/6', '33.3', '0/4', '2/2', '3', 20, '469911017', 29);
+INSERT INTO STAT_I_NA_U VALUES (10283, 10, '2/2', '100', '1/1', '100', '2/2', '100', '3/3', '100', '0/1', '1/1', '0', 14, '413311018', 29);
+INSERT INTO STAT_I_NA_U VALUES (10284, 11, '0/0', '0', '1/1', '100', '3/6', '50', '4/7', '57.1', '0/1', '0/0', '0', 18, '469905024', 29);
+INSERT INTO STAT_I_NA_U VALUES (10285, 17, '3/3', '100', '7/9', '77.8', '0/4', '0', '7/13', '53.8', '1/3', '3/2', '2', 19, '123043', 29);
+INSERT INTO STAT_I_NA_U VALUES (10286, 5, '1/1', '100', '2/3', '66.7', '0/0', '0', '2/3', '66.7', '4/3', '0/0', '2', 20, '513209015', 29);
+INSERT INTO STAT_I_NA_U VALUES (10287, 4, '0/0', '0', '2/5', '40', '0/0', '0', '2/5', '40', '1/3', '1/0', '2', 24, '123076', 29);
+INSERT INTO STAT_I_NA_U VALUES (10288, 0, '0/0', '0', '0/0', '0', '0/2', '0', '0/2', '0', '0/0', '0/0', '2', 17, '455604092', 29);
+INSERT INTO STAT_I_NA_U VALUES (10289, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 3, '201510012', 29);
+INSERT INTO STAT_I_NA_U VALUES (10290, 0, '0/0', '0', '0/3', '0', '0/0', '0', '0/3', '0', '0/2', '0/0', '1', 10, '706110026', 28);
+INSERT INTO STAT_I_NA_U VALUES (10291, 6, '1/2', '50', '1/4', '25', '1/5', '20', '2/9', '22.2', '1/3', '3/0', '2', 22, '433914003', 28);
+INSERT INTO STAT_I_NA_U VALUES (10292, 2, '0/0', '0', '1/1', '100', '0/2', '0', '1/3', '33.3', '1/1', '0/0', '2', 17, '116029', 28);
+INSERT INTO STAT_I_NA_U VALUES (10293, 18, '3/3', '100', '3/6', '50', '3/6', '50', '6/12', '50', '1/2', '2/2', '9', 31, '405709003', 28);
+INSERT INTO STAT_I_NA_U VALUES (10294, 2, '0/0', '0', '1/2', '50', '0/4', '0', '1/6', '16.7', '0/1', '2/0', '0', 22, '828110012', 28);
+INSERT INTO STAT_I_NA_U VALUES (10295, 3, '0/0', '0', '0/1', '0', '1/4', '25', '1/5', '20', '0/2', '1/0', '2', 24, '408709012', 28);
+INSERT INTO STAT_I_NA_U VALUES (10296, 32, '1/2', '50', '8/9', '88.9', '5/8', '62.5', '13/17', '76.5', '1/7', '1/5', '4', 35, '223708009', 28);
+INSERT INTO STAT_I_NA_U VALUES (10297, 12, '5/5', '100', '2/5', '40', '1/2', '50', '3/7', '42.9', '0/1', '0/1', '0', 17, '604816013', 28);
+INSERT INTO STAT_I_NA_U VALUES (10298, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '557113015', 28);
+INSERT INTO STAT_I_NA_U VALUES (10299, 6, '0/0', '0', '3/9', '33.3', '0/0', '0', '3/9', '33.3', '6/8', '0/2', '0', 22, '600607001', 28);
+INSERT INTO STAT_I_NA_U VALUES (10300, 5, '0/0', '0', '1/2', '50', '1/3', '33.3', '2/5', '40', '1/1', '0/5', '4', 17, '734615039', 28);
+INSERT INTO STAT_I_NA_U VALUES (10301, 1, '1/2', '50', '0/0', '0', '0/1', '0', '0/1', '0', '1/2', '1/1', '0', 15, '405015048', 28);
+INSERT INTO STAT_I_NA_U VALUES (10302, 10, '3/4', '75', '2/3', '66.7', '1/3', '33.3', '3/6', '50', '1/5', '3/0', '0', 28, '432815005', 28);
+INSERT INTO STAT_I_NA_U VALUES (10303, 7, '2/4', '50', '1/1', '100', '1/4', '25', '2/5', '40', '0/4', '0/1', '2', 25, '405711034', 28);
+INSERT INTO STAT_I_NA_U VALUES (10304, 8, '1/3', '33.3', '2/7', '28.6', '1/4', '25', '3/11', '27.3', '2/0', '0/1', '0', 22, '123073', 28);
+INSERT INTO STAT_I_NA_U VALUES (10305, 4, '1/2', '50', '0/5', '0', '1/1', '100', '1/6', '16.7', '2/0', '1/1', '0', 21, '103311004', 28);
+INSERT INTO STAT_I_NA_U VALUES (10306, 2, '0/0', '0', '1/1', '100', '0/2', '0', '1/3', '33.3', '0/0', '0/0', '1', 6, '750315107', 28);
+INSERT INTO STAT_I_NA_U VALUES (10307, 2, '0/0', '0', '1/1', '100', '0/0', '0', '1/1', '100', '0/1', '0/0', '0', 4, '416118003', 28);
+INSERT INTO STAT_I_NA_U VALUES (10308, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/3', '0', 2, '431898038', 28);
+INSERT INTO STAT_I_NA_U VALUES (10309, 7, '2/2', '100', '1/4', '25', '1/4', '25', '2/8', '25', '3/6', '0/0', '3', 29, '103614022', 28);
+INSERT INTO STAT_I_NA_U VALUES (10310, 0, '0/0', '0', '0/1', '0', '0/1', '0', '0/2', '0', '1/0', '0/0', '0', 2, '606412001', 28);
+INSERT INTO STAT_I_NA_U VALUES (10311, 16, '8/9', '88.9', '4/11', '36.4', '0/1', '0', '4/12', '33.3', '1/2', '0/1', '1', 29, '123032', 28);
+INSERT INTO STAT_I_NA_U VALUES (10312, 24, '6/9', '66.7', '6/11', '54.5', '2/3', '66.7', '8/14', '57.1', '3/4', '2/1', '5', 27, '123092', 35);
+INSERT INTO STAT_I_NA_U VALUES (10313, 10, '0/1', '0', '2/2', '100', '2/4', '50', '4/6', '66.7', '1/3', '1/0', '1', 19, '509706024', 35);
+INSERT INTO STAT_I_NA_U VALUES (10314, 15, '1/4', '25', '4/4', '100', '2/3', '66.7', '6/7', '85.7', '0/0', '0/0', '1', 21, '431805016', 35);
+INSERT INTO STAT_I_NA_U VALUES (10315, 14, '0/0', '0', '4/7', '57.1', '2/7', '28.6', '6/14', '42.9', '0/3', '1/0', '10', 34, '802106007', 35);
+INSERT INTO STAT_I_NA_U VALUES (10316, 7, '0/0', '0', '2/4', '50', '1/2', '50', '3/6', '50', '2/5', '2/0', '1', 27, '107504016', 35);
+INSERT INTO STAT_I_NA_U VALUES (10317, 3, '0/0', '0', '0/0', '0', '1/3', '33.3', '1/3', '33.3', '0/0', '0/0', '0', 6, '410912027', 35);
+INSERT INTO STAT_I_NA_U VALUES (10318, 0, '0/0', '0', '0/0', '0', '0/3', '0', '0/3', '0', '0/0', '0/1', '4', 12, '169211013', 35);
+INSERT INTO STAT_I_NA_U VALUES (10319, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/1', '0/0', '0', 2, '107598172', 35);
+INSERT INTO STAT_I_NA_U VALUES (10320, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '223915004', 35);
+INSERT INTO STAT_I_NA_U VALUES (10321, 6, '2/2', '100', '2/8', '25', '0/0', '0', '2/8', '25', '1/2', '4/1', '1', 30, '123015', 35);
+INSERT INTO STAT_I_NA_U VALUES (10322, 15, '1/2', '50', '4/6', '66.7', '2/3', '66.7', '6/9', '66.7', '5/2', '0/0', '2', 22, '460505034', 35);
+INSERT INTO STAT_I_NA_U VALUES (10323, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 3, '706110026', 35);
+INSERT INTO STAT_I_NA_U VALUES (10324, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '433914003', 35);
+INSERT INTO STAT_I_NA_U VALUES (10325, 3, '0/0', '0', '0/0', '0', '1/1', '100', '1/1', '100', '0/0', '0/0', '0', 10, '116029', 35);
+INSERT INTO STAT_I_NA_U VALUES (10326, 10, '3/4', '75', '2/4', '50', '1/4', '25', '3/8', '37.5', '1/3', '0/1', '7', 33, '405709003', 35);
+INSERT INTO STAT_I_NA_U VALUES (10327, 8, '0/0', '0', '1/2', '50', '2/5', '40', '3/7', '42.9', '0/1', '1/1', '0', 30, '828110012', 35);
+INSERT INTO STAT_I_NA_U VALUES (10328, 20, '2/2', '100', '0/1', '0', '6/9', '66.7', '6/10', '60', '1/0', '0/3', '1', 26, '408709012', 35);
+INSERT INTO STAT_I_NA_U VALUES (10329, 17, '4/6', '66.7', '2/2', '100', '3/3', '100', '5/5', '100', '0/4', '0/3', '0', 18, '223708009', 35);
+INSERT INTO STAT_I_NA_U VALUES (10330, 0, '0/0', '0', '0/1', '0', '0/0', '0', '0/1', '0', '0/1', '0/0', '0', 7, '604816013', 35);
+INSERT INTO STAT_I_NA_U VALUES (10331, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '557113015', 35);
+INSERT INTO STAT_I_NA_U VALUES (10332, 6, '0/0', '0', '3/3', '100', '0/0', '0', '3/3', '100', '1/10', '0/1', '1', 28, '600607001', 35);
+INSERT INTO STAT_I_NA_U VALUES (10333, 3, '1/1', '100', '1/1', '100', '0/3', '0', '1/4', '25', '0/1', '0/0', '1', 14, '439811005', 35);
+INSERT INTO STAT_I_NA_U VALUES (10334, 15, '6/6', '100', '3/5', '60', '1/5', '20', '4/10', '40', '3/1', '0/3', '4', 30, '208006', 35);
+INSERT INTO STAT_I_NA_U VALUES (10335, 18, '7/10', '70', '1/4', '25', '3/5', '60', '4/9', '44.4', '0/2', '2/1', '6', 34, '123103', 29);
+INSERT INTO STAT_I_NA_U VALUES (10336, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 1, '302111019', 29);
+INSERT INTO STAT_I_NA_U VALUES (10337, 0, '0/0', '0', '0/3', '0', '0/0', '0', '0/3', '0', '0/0', '0/1', '0', 6, '300210023', 29);
+INSERT INTO STAT_I_NA_U VALUES (10338, 8, '0/0', '0', '4/5', '80', '0/0', '0', '4/5', '80', '1/0', '0/0', '0', 16, '600112016', 29);
+INSERT INTO STAT_I_NA_U VALUES (10339, 21, '10/11', '90.9', '4/6', '66.7', '1/4', '25', '5/10', '50', '6/10', '0/4', '4', 30, '603001165', 29);
+INSERT INTO STAT_I_NA_U VALUES (10340, 2, '0/0', '0', '1/1', '100', '0/1', '0', '1/2', '50', '1/1', '1/1', '0', 8, '603010016', 29);
+INSERT INTO STAT_I_NA_U VALUES (10341, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '302114004', 29);
+INSERT INTO STAT_I_NA_U VALUES (10342, 10, '0/0', '0', '2/3', '66.7', '2/7', '28.6', '4/10', '40', '0/0', '1/3', '3', 32, '123060', 29);
+INSERT INTO STAT_I_NA_U VALUES (10343, 14, '4/6', '66.7', '5/7', '71.4', '0/0', '0', '5/7', '71.4', '2/3', '0/0', '1', 18, '601210020', 29);
+INSERT INTO STAT_I_NA_U VALUES (10344, 2, '2/4', '50', '0/0', '0', '0/0', '0', '0/0', '0', '0/1', '0/0', '0', 9, '300208002', 29);
+INSERT INTO STAT_I_NA_U VALUES (10345, 9, '3/3', '100', '3/5', '60', '0/3', '0', '3/8', '37.5', '0/8', '0/0', '3', 30, '661206001', 29);
+INSERT INTO STAT_I_NA_U VALUES (10346, 0, '0/0', '0', '0/0', '0', '0/3', '0', '0/3', '0', '0/1', '0/0', '0', 16, '603006019', 29);
+INSERT INTO STAT_I_NA_U VALUES (10347, 5, '0/0', '0', '1/4', '25', '1/3', '33.3', '2/7', '28.6', '1/0', '1/0', '0', 16, '123100', 29);
+INSERT INTO STAT_I_NA_U VALUES (10348, 6, '2/2', '100', '2/6', '33.3', '0/4', '0', '2/10', '20', '0/1', '1/1', '0', 17, '124002', 29);
+INSERT INTO STAT_I_NA_U VALUES (10349, 9, '0/0', '0', '0/0', '0', '3/4', '75', '3/4', '75', '1/2', '0/0', '0', 14, '169207034', 29);
+INSERT INTO STAT_I_NA_U VALUES (10350, 19, '8/10', '80', '4/6', '66.7', '1/3', '33.3', '5/9', '55.6', '3/3', '0/2', '5', 35, '123033', 29);
+INSERT INTO STAT_I_NA_U VALUES (10351, 4, '2/2', '100', '1/2', '50', '0/1', '0', '1/3', '33.3', '0/3', '2/0', '1', 24, '502797030', 29);
+INSERT INTO STAT_I_NA_U VALUES (10352, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '557004011', 29);
+INSERT INTO STAT_I_NA_U VALUES (10353, 7, '0/3', '0', '2/4', '50', '1/1', '100', '3/5', '60', '0/2', '2/2', '1', 17, '459412005', 29);
+INSERT INTO STAT_I_NA_U VALUES (10354, 12, '1/2', '50', '4/6', '66.7', '1/2', '50', '5/8', '62.5', '1/1', '0/2', '2', 20, '503012004', 29);
+INSERT INTO STAT_I_NA_U VALUES (10355, 7, '5/6', '83.3', '1/2', '50', '0/0', '0', '1/2', '50', '2/7', '0/0', '0', 14, '513699056', 29);
+INSERT INTO STAT_I_NA_U VALUES (10356, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 5, '223509015', 29);
+INSERT INTO STAT_I_NA_U VALUES (10357, 0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/1', '1/0', '1', 11, '642416013', 29);
+INSERT INTO STAT_I_NA_U VALUES (10358, 6, '0/2', '0', '3/4', '75', '0/4', '0', '3/8', '37.5', '0/4', '0/4', '1', 27, '557000024', 29);
+INSERT INTO STAT_I_NA_U VALUES (10359, 12, '3/3', '100', '3/4', '75', '1/5', '20', '4/9', '44.4', '0/5', '0/1', '1', 18, '602210016', 21);
+INSERT INTO STAT_I_NA_U VALUES (10360, 9, '3/4', '75', '0/1', '0', '2/5', '40', '2/6', '33.3', '0/1', '0/2', '2', 18, '455603014', 21);
+INSERT INTO STAT_I_NA_U VALUES (10361, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '404712007', 21);
+INSERT INTO STAT_I_NA_U VALUES (10362, 4, '0/0', '0', '2/2', '100', '0/0', '0', '2/2', '100', '1/3', '0/0', '0', 18, '734613005', 21);
+INSERT INTO STAT_I_NA_U VALUES (10363, 2, '0/0', '0', '1/6', '16.7', '0/0', '0', '1/6', '16.7', '3/1', '0/0', '0', 9, '606402515', 21);
+INSERT INTO STAT_I_NA_U VALUES (10364, 4, '0/0', '0', '2/2', '100', '0/1', '0', '2/3', '66.7', '1/6', '1/0', '2', 24, '107203013', 21);
+INSERT INTO STAT_I_NA_U VALUES (10365, 0, '0/0', '0', '0/1', '0', '0/1', '0', '0/2', '0', '0/0', '0/0', '0', 5, '459410015', 21);
+INSERT INTO STAT_I_NA_U VALUES (10366, 12, '2/2', '100', '2/2', '100', '2/4', '50', '4/6', '66.7', '1/5', '0/1', '1', 21, '235115001', 21);
+INSERT INTO STAT_I_NA_U VALUES (10367, 19, '3/5', '60', '8/11', '72.7', '0/0', '0', '8/11', '72.7', '2/2', '0/2', '0', 22, '465403022', 21);
+INSERT INTO STAT_I_NA_U VALUES (10368, 7, '3/3', '100', '2/4', '50', '0/2', '0', '2/6', '33.3', '2/1', '3/0', '1', 19, '216002', 21);
+INSERT INTO STAT_I_NA_U VALUES (10369, 11, '2/2', '100', '3/4', '75', '1/2', '50', '4/6', '66.7', '0/4', '1/1', '7', 21, '205007', 21);
+INSERT INTO STAT_I_NA_U VALUES (10370, 19, '4/4', '100', '6/6', '100', '1/2', '50', '7/8', '87.5', '0/1', '1/1', '4', 25, '105010012', 21);
+INSERT INTO STAT_I_NA_U VALUES (10371, 11, '0/1', '0', '1/2', '50', '3/9', '33.3', '4/11', '36.4', '1/5', '2/3', '7', 39, '123103', 21);
+INSERT INTO STAT_I_NA_U VALUES (10372, 0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '1/0', '0/0', '0', 7, '614614019', 21);
+INSERT INTO STAT_I_NA_U VALUES (10373, 16, '4/5', '80', '3/4', '75', '2/2', '100', '5/6', '83.3', '1/2', '1/0', '0', 18, '600112016', 21);
+INSERT INTO STAT_I_NA_U VALUES (10374, 16, '8/10', '80', '1/5', '20', '2/4', '50', '3/9', '33.3', '1/7', '0/3', '1', 29, '603001165', 21);
+INSERT INTO STAT_I_NA_U VALUES (10375, 2, '0/0', '0', '1/1', '100', '0/2', '0', '1/3', '33.3', '0/0', '1/0', '0', 13, '603010016', 21);
+INSERT INTO STAT_I_NA_U VALUES (10376, 2, '0/0', '0', '1/3', '33.3', '0/0', '0', '1/3', '33.3', '0/0', '0/0', '0', 4, '302114004', 21);
+INSERT INTO STAT_I_NA_U VALUES (10377, 11, '2/2', '100', '3/5', '60', '1/3', '33.3', '4/8', '50', '1/2', '1/2', '2', 27, '123060', 21);
+INSERT INTO STAT_I_NA_U VALUES (10378, 0, '0/0', '0', '0/1', '0', '0/0', '0', '0/1', '0', '0/0', '1/0', '0', 4, '601210020', 21);
+INSERT INTO STAT_I_NA_U VALUES (10379, 20, '2/2', '100', '3/7', '42.9', '4/6', '66.7', '7/13', '53.8', '3/2', '1/3', '3', 31, '661206001', 21);
+INSERT INTO STAT_I_NA_U VALUES (10380, 2, '0/0', '0', '1/3', '33.3', '0/6', '0', '1/9', '11.1', '0/1', '0/0', '2', 28, '603006019', 21);
+INSERT INTO STAT_I_NA_U VALUES (10381, 0, '0/0', '0', '0/1', '0', '0/2', '0', '0/3', '0', '0/3', '0/0', '1', 32, '506812002', 30);
+INSERT INTO STAT_I_NA_U VALUES (10382, 0, '0/0', '0', '0/1', '0', '0/0', '0', '0/1', '0', '0/0', '0/0', '0', 6, '432808024', 30);
+INSERT INTO STAT_I_NA_U VALUES (10383, 14, '1/1', '100', '5/11', '45.5', '1/1', '100', '6/12', '50', '0/1', '1/4', '2', 25, '122084', 30);
+INSERT INTO STAT_I_NA_U VALUES (10384,6, '1/2', '50', '1/2', '50', '1/2', '50', '2/4', '50', '1/1', '0/3', '2', 19, '600510009', 30);
+INSERT INTO STAT_I_NA_U VALUES (10385,4, '0/0', '0', '2/2', '100', '0/2', '0', '2/4', '50', '0/4', '0/0', '2', 12, '601201167', 30);
+INSERT INTO STAT_I_NA_U VALUES (10386,9, '0/0', '0', '3/6', '50', '1/1', '100', '4/7', '57.1', '0/3', '1/1', '1', 24, '213005', 30);
+INSERT INTO STAT_I_NA_U VALUES (10387,14, '2/5', '40', '6/6', '100', '0/0', '0', '6/6', '100', '3/3', '0/1', '0', 15, '105118001', 30);
+INSERT INTO STAT_I_NA_U VALUES (10388,4, '0/0', '0', '2/2', '100', '0/0', '0', '2/2', '100', '1/2', '0/1', '3', 9, '431898035', 30);
+INSERT INTO STAT_I_NA_U VALUES (10389,10, '4/6', '66.7', '0/0', '0', '2/5', '40', '2/5', '40', '0/3', '4/0', '3', 33, '153404007', 30);
+INSERT INTO STAT_I_NA_U VALUES (10390,18, '5/5', '100', '2/2', '100', '3/3', '100', '5/5', '100', '0/2', '0/1', '1', 21, '642417047', 30);
+INSERT INTO STAT_I_NA_U VALUES (10391,4, '0/0', '0', '2/2', '100', '0/2', '0', '2/4', '50', '0/1', '1/0', '0', 13, '706110026', 30);
+INSERT INTO STAT_I_NA_U VALUES (10392,0, '0/2', '0', '0/1', '0', '0/4', '0', '0/5', '0', '0/5', '0/0', '1', 24, '433914003', 30);
+INSERT INTO STAT_I_NA_U VALUES (10393,10, '2/2', '100', '4/5', '80', '0/3', '0', '4/8', '50', '0/2', '1/2', '1', 24, '116029', 30);
+INSERT INTO STAT_I_NA_U VALUES (10394,14, '3/4', '75', '1/3', '33.3', '3/3', '100', '4/6', '66.7', '1/1', '0/3', '5', 36, '405709003', 30);
+INSERT INTO STAT_I_NA_U VALUES (10395,0, '0/0', '0', '0/2', '0', '0/0', '0', '0/2', '0', '0/0', '0/0', '0', 15, '828110012', 30);
+INSERT INTO STAT_I_NA_U VALUES (10396,13, '0/0', '0', '2/2', '100', '3/6', '50', '5/8', '62.5', '0/2', '1/2', '3', 28, '408709012', 30);
+INSERT INTO STAT_I_NA_U VALUES (10397,11, '2/4', '50', '0/5', '0', '3/4', '75', '3/9', '33.3', '3/4', '1/3', '1', 31, '223708009', 30);
+INSERT INTO STAT_I_NA_U VALUES (10398,13, '0/0', '0', '5/10', '50', '1/2', '50', '6/12', '50', '3/3', '1/2', '1', 29, '604816013', 30);
+INSERT INTO STAT_I_NA_U VALUES (10399,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '557113015', 30);
+INSERT INTO STAT_I_NA_U VALUES (10400,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '600607001', 30);
+INSERT INTO STAT_I_NA_U VALUES (10401,4, '1/4', '25', '0/1', '0', '1/2', '50', '1/3', '33.3', '1/1', '0/0', '1', 20, '734615039', 25);
+INSERT INTO STAT_I_NA_U VALUES (10402,1, '1/2', '50', '0/2', '0', '0/5', '0', '0/7', '0', '0/2', '0/2', '1', 23, '432815005', 25);
+INSERT INTO STAT_I_NA_U VALUES (10403,4, '0/2', '0', '2/5', '40', '0/6', '0', '2/11', '18.2', '1/2', '1/1', '1', 25, '513703024', 25);
+INSERT INTO STAT_I_NA_U VALUES (10404,2, '0/0', '0', '1/2', '50', '0/2', '0', '1/4', '25', '0/2', '0/2', '2', 19, '405711034', 25);
+INSERT INTO STAT_I_NA_U VALUES (10405,7, '1/2', '50', '3/4', '75', '0/2', '0', '3/6', '50', '3/6', '0/4', '1', 24, '452805009', 25);
+INSERT INTO STAT_I_NA_U VALUES (10406,3, '1/1', '100', '1/1', '100', '0/1', '0', '1/2', '50', '0/2', '0/0', '0', 5, '750315107', 25);
+INSERT INTO STAT_I_NA_U VALUES (10407,11, '0/0', '0', '1/8', '12.5', '3/4', '75', '4/12', '33.3', '2/3', '0/2', '2', 25, '469908017', 25);
+INSERT INTO STAT_I_NA_U VALUES (10408,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '431898038', 25);
+INSERT INTO STAT_I_NA_U VALUES (10409,3, '1/2', '50', '1/1', '100', '0/1', '0', '1/2', '50', '0/3', '1/1', '1', 17, '103614022', 25);
+INSERT INTO STAT_I_NA_U VALUES (10410,11, '3/4', '75', '4/8', '50', '0/4', '0', '4/12', '33.3', '3/5', '0/1', '0', 23, '123032', 25);
+INSERT INTO STAT_I_NA_U VALUES (10411,2, '2/3', '66.7', '0/1', '0', '0/2', '0', '0/3', '0', '1/4', '0/0', '0', 13, '642500060', 25);
+INSERT INTO STAT_I_NA_U VALUES (10412,13, '2/3', '66.7', '4/7', '57.1', '1/4', '25', '5/11', '45.5', '0/5', '0/0', '1', 32, '506812002', 25);
+INSERT INTO STAT_I_NA_U VALUES (10413,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '432808024', 25);
+INSERT INTO STAT_I_NA_U VALUES (10414,21, '4/4', '100', '7/10', '70', '1/3', '33.3', '8/13', '61.5', '0/0', '0/1', '8', 27, '122084', 25);
+INSERT INTO STAT_I_NA_U VALUES (10415,18, '2/2', '100', '5/5', '100', '2/4', '50', '7/9', '77.8', '1/4', '2/0', '2', 26, '600510009', 25);
+INSERT INTO STAT_I_NA_U VALUES (10416,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '601201167', 25);
+INSERT INTO STAT_I_NA_U VALUES (10417,0, '0/2', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/3', '0/0', '0', 5, '213005', 25);
+INSERT INTO STAT_I_NA_U VALUES (10418,8, '4/4', '100', '2/3', '66.7', '0/2', '0', '2/5', '40', '1/2', '0/1', '0', 10, '642401169', 25);
+INSERT INTO STAT_I_NA_U VALUES (10419,7, '4/10', '40', '0/3', '0', '1/1', '100', '1/4', '25', '2/11', '2/3', '0', 29, '105118001', 25);
+INSERT INTO STAT_I_NA_U VALUES (10420,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '431898035', 25);
+INSERT INTO STAT_I_NA_U VALUES (10421,6, '1/1', '100', '1/1', '100', '1/3', '33.3', '2/4', '50', '1/8', '0/0', '3', 32, '153404007', 25);
+INSERT INTO STAT_I_NA_U VALUES (10422,2, '0/0', '0', '1/4', '25', '0/3', '0', '1/7', '14.3', '0/0', '1/0', '2', 18, '116028', 25);
+INSERT INTO STAT_I_NA_U VALUES (10423,0, '0/0', '0', '0/2', '0', '0/2', '0', '0/4', '0', '0/1', '0/1', '0', 21, '642417047', 25);
+INSERT INTO STAT_I_NA_U VALUES (10424,21, '4/5', '80', '4/5', '80', '3/9', '33.3', '7/14', '50', '1/2', '0/0', '9', 32, '123042', 31);
+INSERT INTO STAT_I_NA_U VALUES (10425,7, '1/3', '33.3', '3/6', '50', '0/0', '0', '3/6', '50', '0/2', '0/1', '3', 12, '630213016', 31);
+INSERT INTO STAT_I_NA_U VALUES (10426,17, '3/5', '60', '7/11', '63.6', '0/2', '0', '7/13', '53.8', '3/6', '0/4', '1', 23, '630208006', 31);
+INSERT INTO STAT_I_NA_U VALUES (10427,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '659918012', 31);
+INSERT INTO STAT_I_NA_U VALUES (10428,17, '0/0', '0', '4/8', '50', '3/7', '42.9', '7/15', '46.7', '0/12', '0/1', '1', 30, '405011013', 31);
+INSERT INTO STAT_I_NA_U VALUES (10429,4, '0/0', '0', '2/3', '66.7', '0/2', '0', '2/5', '40', '1/2', '0/2', '2', 30, '603112071', 31);
+INSERT INTO STAT_I_NA_U VALUES (10430,7, '2/2', '100', '1/1', '100', '1/3', '33.3', '2/4', '50', '1/2', '0/1', '1', 17, '630210023', 31);
+INSERT INTO STAT_I_NA_U VALUES (10431,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '601917004', 31);
+INSERT INTO STAT_I_NA_U VALUES (10432,5, '0/0', '0', '1/2', '50', '1/4', '25', '2/6', '33.3', '0/1', '0/1', '1', 17, '559102536', 31);
+INSERT INTO STAT_I_NA_U VALUES (10433,6, '2/3', '66.7', '2/3', '66.7', '0/2', '0', '2/5', '40', '2/9', '0/1', '2', 32, '603011016', 31);
+INSERT INTO STAT_I_NA_U VALUES (10434,2, '0/0', '0', '1/1', '100', '0/0', '0', '1/1', '100', '1/1', '0/1', '0', 7, '223006', 31);
+INSERT INTO STAT_I_NA_U VALUES (10435,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '602110027', 31);
+INSERT INTO STAT_I_NA_U VALUES (10436,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '614614019', 31);
+INSERT INTO STAT_I_NA_U VALUES (10437,4, '1/2', '50', '0/7', '0', '1/4', '25', '1/11', '9.1', '0/1', '0/0', '5', 29, '300210023', 31);
+INSERT INTO STAT_I_NA_U VALUES (10438,2, '0/0', '0', '1/3', '33.3', '0/2', '0', '1/5', '20', '1/3', '0/1', '0', 9, '600112016', 31);
+INSERT INTO STAT_I_NA_U VALUES (10439,12, '1/2', '50', '4/8', '50', '1/4', '25', '5/12', '41.7', '1/7', '1/2', '4', 31, '603001165', 31);
+INSERT INTO STAT_I_NA_U VALUES (10440,3, '1/2', '50', '1/3', '33.3', '0/1', '0', '1/4', '25', '1/2', '0/1', '2', 15, '603010016', 31);
+INSERT INTO STAT_I_NA_U VALUES (10441,0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/0', '0/1', '0', 3, '302114004', 31);
+INSERT INTO STAT_I_NA_U VALUES (10442,9, '2/2', '100', '2/5', '40', '1/4', '25', '3/9', '33.3', '0/5', '2/0', '2', 23, '123060', 31);
+INSERT INTO STAT_I_NA_U VALUES (10443,6, '2/3', '66.7', '2/3', '66.7', '0/0', '0', '2/3', '66.7', '1/2', '0/1', '0', 13, '601210020', 31);
+INSERT INTO STAT_I_NA_U VALUES (10444,9, '1/3', '33.3', '4/6', '66.7', '0/1', '0', '4/7', '57.1', '1/3', '3/2', '1', 23, '300208002', 31);
+INSERT INTO STAT_I_NA_U VALUES (10445,11, '2/3', '66.7', '3/8', '37.5', '1/3', '33.3', '4/11', '36.4', '3/3', '0/1', '0', 29, '661206001', 31);
+INSERT INTO STAT_I_NA_U VALUES (10446,14, '1/1', '100', '2/3', '66.7', '3/6', '50', '5/9', '55.6', '2/0', '1/1', '1', 25, '603006019', 31);
+INSERT INTO STAT_I_NA_U VALUES (10447,9, '0/0', '0', '3/7', '42.9', '1/2', '50', '4/9', '44.4', '0/2', '1/1', '3', 22, '802104062', 33);
+INSERT INTO STAT_I_NA_U VALUES (10448,0, '0/0', '0', '0/1', '0', '0/1', '0', '0/2', '0', '0/0', '0/0', '0', 6, '869012004', 33);
+INSERT INTO STAT_I_NA_U VALUES (10449,3, '0/0', '0', '0/1', '0', '1/2', '50', '1/3', '33.3', '0/1', '0/2', '0', 13, '800310048', 33);
+INSERT INTO STAT_I_NA_U VALUES (10450,37, '4/9', '44.4', '9/11', '81.8', '5/9', '55.6', '14/20', '70', '2/5', '1/3', '3', 37, '123066', 33);
+INSERT INTO STAT_I_NA_U VALUES (10451,10, '2/4', '50', '4/5', '80', '0/0', '0', '4/5', '80', '2/3', '0/1', '3', 17, '802102327', 33);
+INSERT INTO STAT_I_NA_U VALUES (10452,8, '2/2', '100', '3/3', '100', '0/1', '0', '3/4', '75', '1/2', '0/1', '0', 24, '869013016', 33);
+INSERT INTO STAT_I_NA_U VALUES (10453,7, '1/2', '50', '3/4', '75', '0/1', '0', '3/5', '60', '1/3', '0/1', '2', 17, '223005', 33);
+INSERT INTO STAT_I_NA_U VALUES (10454,8, '2/2', '100', '3/5', '60', '0/0', '0', '3/5', '60', '3/2', '0/0', '3', 19, '123064', 33);
+INSERT INTO STAT_I_NA_U VALUES (10455,2, '0/0', '0', '1/4', '25', '0/8', '0', '1/12', '8.3', '0/3', '2/2', '4', 36, '123065', 33);
+INSERT INTO STAT_I_NA_U VALUES (10456,19, '6/6', '100', '5/5', '100', '1/3', '33.3', '6/8', '75', '0/1', '0/1', '2', 27, '123042', 33);
+INSERT INTO STAT_I_NA_U VALUES (10457,11, '4/5', '80', '2/2', '100', '1/7', '14.3', '3/9', '33.3', '0/1', '1/2', '1', 24, '630213016', 33);
+INSERT INTO STAT_I_NA_U VALUES (10458,16, '6/8', '75', '5/7', '71.4', '0/2', '0', '5/9', '55.6', '3/4', '0/0', '2', 24, '630208006', 33);
+INSERT INTO STAT_I_NA_U VALUES (10459,17, '3/6', '50', '4/8', '50', '2/4', '50', '6/12', '50', '1/7', '1/0', '1', 31, '405011013', 33);
+INSERT INTO STAT_I_NA_U VALUES (10460,0, '0/0', '0', '0/1', '0', '0/0', '0', '0/1', '0', '1/2', '0/2', '2', 18, '603112071', 33);
+INSERT INTO STAT_I_NA_U VALUES (10461,15, '1/2', '50', '4/4', '100', '2/4', '50', '6/8', '75', '0/3', '2/1', '2', 20, '630210023', 33);
+INSERT INTO STAT_I_NA_U VALUES (10462,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '601917004', 33);
+INSERT INTO STAT_I_NA_U VALUES (10463,6, '0/0', '0', '3/3', '100', '0/5', '0', '3/8', '37.5', '3/5', '1/0', '1', 28, '559102536', 33);
+INSERT INTO STAT_I_NA_U VALUES (10464,8, '2/2', '100', '3/7', '42.9', '0/2', '0', '3/9', '33.3', '3/1', '0/1', '3', 22, '603011016', 33);
+INSERT INTO STAT_I_NA_U VALUES (10465,2, '0/0', '0', '1/3', '33.3', '0/0', '0', '1/3', '33.3', '1/0', '0/0', '0', 6, '223006', 33);
+INSERT INTO STAT_I_NA_U VALUES (10466,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '302814008', 32);
+INSERT INTO STAT_I_NA_U VALUES (10467,13, '2/3', '66.7', '4/6', '66.7', '1/5', '20', '5/11', '45.5', '1/8', '3/1', '1', 33, '724708008', 32);
+INSERT INTO STAT_I_NA_U VALUES (10468,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '302819018', 32);
+INSERT INTO STAT_I_NA_U VALUES (10469,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '601113009', 32);
+INSERT INTO STAT_I_NA_U VALUES (10470,8, '0/1', '0', '4/5', '80', '0/0', '0', '4/5', '80', '2/4', '0/0', '1', 22, '122072', 32);
+INSERT INTO STAT_I_NA_U VALUES (10471,8, '1/2', '50', '2/3', '66.7', '1/5', '20', '3/8', '37.5', '2/3', '1/0', '2', 25, '506308005', 32);
+INSERT INTO STAT_I_NA_U VALUES (10472,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '601118025', 32);
+INSERT INTO STAT_I_NA_U VALUES (10473,25, '7/8', '87.5', '6/12', '50', '2/8', '25', '8/20', '40', '0/2', '1/1', '1', 35, '123062', 32);
+INSERT INTO STAT_I_NA_U VALUES (10474,11, '4/4', '100', '2/5', '40', '1/6', '16.7', '3/11', '27.3', '1/3', '1/1', '2', 33, '123061', 32);
+INSERT INTO STAT_I_NA_U VALUES (10475,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '603214001', 32);
+INSERT INTO STAT_I_NA_U VALUES (10476,2, '0/0', '0', '1/3', '33.3', '0/0', '0', '1/3', '33.3', '0/0', '0/0', '0', 11, '406515004', 32);
+INSERT INTO STAT_I_NA_U VALUES (10477,8, '2/4', '50', '3/6', '50', '0/0', '0', '3/6', '50', '4/3', '0/0', '0', 20, '439810018', 32);
+INSERT INTO STAT_I_NA_U VALUES (10478,13, '0/2', '0', '2/5', '40', '3/4', '75', '5/9', '55.6', '2/12', '1/5', '2', 31, '630216053', 32);
+INSERT INTO STAT_I_NA_U VALUES (10479,9, '3/4', '75', '0/1', '0', '2/8', '25', '2/9', '22.2', '0/2', '0/1', '1', 29, '402617004', 32);
+INSERT INTO STAT_I_NA_U VALUES (10480,11, '2/2', '100', '0/2', '0', '3/8', '37.5', '3/10', '30', '2/3', '1/4', '5', 29, '122082', 32);
+INSERT INTO STAT_I_NA_U VALUES (10481,0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/0', '0/0', '0', 2, '431814019', 32);
+INSERT INTO STAT_I_NA_U VALUES (10482,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '438314009', 32);
+INSERT INTO STAT_I_NA_U VALUES (10483,9, '1/4', '25', '4/6', '66.7', '0/0', '0', '4/6', '66.7', '3/0', '0/0', '0', 18, '411210004', 32);
+INSERT INTO STAT_I_NA_U VALUES (10484,6, '0/0', '0', '3/3', '100', '0/5', '0', '3/8', '37.5', '2/1', '1/0', '2', 11, '302814003', 32);
+INSERT INTO STAT_I_NA_U VALUES (10485,16, '3/5', '60', '2/4', '50', '3/8', '37.5', '5/12', '41.7', '0/3', '2/1', '0', 30, '401506024', 32);
+INSERT INTO STAT_I_NA_U VALUES (10486,0, '0/0', '0', '0/1', '0', '0/3', '0', '0/4', '0', '1/2', '0/3', '4', 19, '348014035', 32);
+INSERT INTO STAT_I_NA_U VALUES (10487,15, '0/0', '0', '3/3', '100', '3/5', '60', '6/8', '75', '0/1', '2/2', '10', 20, '123103', 29);
+INSERT INTO STAT_I_NA_U VALUES (10488,9, '0/0', '0', '0/1', '0', '3/3', '100', '3/4', '75', '0/3', '0/1', '1', 16, '614614019', 29);
+INSERT INTO STAT_I_NA_U VALUES (10489,0, '0/0', '0', '0/0', '0', '0/2', '0', '0/2', '0', '0/0', '0/4', '0', 9, '302111019', 29);
+INSERT INTO STAT_I_NA_U VALUES (10490,9, '1/1', '100', '4/6', '66.7', '0/1', '0', '4/7', '57.1', '0/1', '2/2', '6', 17, '300210023', 29);
+INSERT INTO STAT_I_NA_U VALUES (10491,11, '7/7', '100', '2/5', '40', '0/1', '0', '2/6', '33.3', '0/5', '0/1', '2', 17, '603001165', 29);
+INSERT INTO STAT_I_NA_U VALUES (10492,10, '0/0', '0', '2/2', '100', '2/3', '66.7', '4/5', '80', '0/1', '2/1', '0', 16, '603010016', 29);
+INSERT INTO STAT_I_NA_U VALUES (10493,9, '0/0', '0', '0/0', '0', '3/6', '50', '3/6', '50', '1/1', '1/2', '0', 16, '123060', 29);
+INSERT INTO STAT_I_NA_U VALUES (10494,10, '0/0', '0', '5/7', '71.4', '0/0', '0', '5/7', '71.4', '1/4', '0/0', '0', 17, '601210020', 29);
+INSERT INTO STAT_I_NA_U VALUES (10495,2, '0/2', '0', '1/1', '100', '0/2', '0', '1/3', '33.3', '2/1', '1/1', '0', 15, '300208002', 29);
+INSERT INTO STAT_I_NA_U VALUES (10496,8, '0/0', '0', '1/1', '100', '2/4', '50', '3/5', '60', '0/6', '0/1', '9', 20, '661206001', 29);
+INSERT INTO STAT_I_NA_U VALUES (10497,14, '0/0', '0', '1/1', '100', '4/5', '80', '5/6', '83.3', '0/2', '1/0', '2', 18, '603006019', 29);
+INSERT INTO STAT_I_NA_U VALUES (10498,2, '0/0', '0', '1/1', '100', '0/0', '0', '1/1', '100', '0/0', '0/0', '1', 6, '302814008', 29);
+INSERT INTO STAT_I_NA_U VALUES (10499,0, '0/0', '0', '0/1', '0', '0/0', '0', '0/1', '0', '1/0', '2/0', '0', 7, '302819018', 29);
+INSERT INTO STAT_I_NA_U VALUES (10500,3, '0/0', '0', '0/0', '0', '1/1', '100', '1/1', '100', '0/0', '0/1', '0', 8, '601113009', 29);
+INSERT INTO STAT_I_NA_U VALUES (10501,15, '5/6', '83.3', '5/8', '62.5', '0/0', '0', '5/8', '62.5', '4/8', '1/4', '0', 38, '122072', 29);
+INSERT INTO STAT_I_NA_U VALUES (10502,5, '3/4', '75', '1/3', '33.3', '0/3', '0', '1/6', '16.7', '2/3', '2/1', '1', 24, '506308005', 29);
+INSERT INTO STAT_I_NA_U VALUES (10503,30, '2/2', '100', '8/10', '80', '4/11', '36.4', '12/21', '57.1', '0/3', '2/1', '0', 29, '123062', 29);
+INSERT INTO STAT_I_NA_U VALUES (10504,10, '4/5', '80', '3/8', '37.5', '0/3', '0', '3/11', '27.3', '0/2', '0/1', '1', 24, '123095', 29);
+INSERT INTO STAT_I_NA_U VALUES (10505,7, '3/7', '42.9', '2/3', '66.7', '0/3', '0', '2/6', '33.3', '0/1', '1/5', '4', 26, '302111025', 29);
+INSERT INTO STAT_I_NA_U VALUES (10506,0, '0/0', '0', '0/0', '0', '0/5', '0', '0/5', '0', '0/3', '0/1', '3', 25, '603214001', 29);
+INSERT INTO STAT_I_NA_U VALUES (10507,14, '0/0', '0', '7/10', '70', '0/0', '0', '7/10', '70', '0/2', '2/1', '1', 20, '802104062', 33);
+INSERT INTO STAT_I_NA_U VALUES (10508,1, '1/2', '50', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 3, '869012004', 33);
+INSERT INTO STAT_I_NA_U VALUES (10509,5, '2/2', '100', '0/0', '0', '1/1', '100', '1/1', '100', '0/1', '1/0', '0', 5, '800310048', 33);
+INSERT INTO STAT_I_NA_U VALUES (10510,13, '2/2', '100', '4/4', '100', '1/2', '50', '5/6', '83.3', '0/3', '0/3', '2', 26, '869012004', 33);
+INSERT INTO STAT_I_NA_U VALUES (10511,20, '4/4', '100', '5/6', '83.3', '2/5', '40', '7/11', '63.6', '1/0', '1/1', '1', 28, '123066', 33);
+INSERT INTO STAT_I_NA_U VALUES (10512,5, '1/2', '50', '2/3', '66.7', '0/0', '0', '2/3', '66.7', '1/2', '0/1', '2', 14, '802102327', 33);
+INSERT INTO STAT_I_NA_U VALUES (10513,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '869013016', 33);
+INSERT INTO STAT_I_NA_U VALUES (10514,11, '3/4', '75', '4/9', '44.4', '0/2', '0', '4/11', '36.4', '3/10', '5/3', '2', 34, '223005', 33);
+INSERT INTO STAT_I_NA_U VALUES (10515,15, '5/6', '83.3', '5/7', '71.4', '0/0', '0', '5/7', '71.4', '0/5', '0/0', '0', 25, '123064', 33);
+INSERT INTO STAT_I_NA_U VALUES (10516,15, '2/2', '100', '2/3', '66.7', '3/7', '42.9', '5/10', '50', '0/2', '1/3', '3', 36, '123065', 33);
+INSERT INTO STAT_I_NA_U VALUES (10517,5, '1/2', '50', '2/5', '40', '0/3', '0', '2/8', '25', '0/3', '0/4', '2', 24, '603415008', 33);
+INSERT INTO STAT_I_NA_U VALUES (10518,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/1', '0/0', '0', 3, '400100233', 33);
+INSERT INTO STAT_I_NA_U VALUES (10519,11, '2/4', '50', '0/0', '0', '3/5', '60', '3/5', '60', '2/2', '0/0', '3', 38, '432801064', 33);
+INSERT INTO STAT_I_NA_U VALUES (10520,14, '0/1', '0', '4/5', '80', '2/4', '50', '6/9', '66.7', '1/2', '2/4', '7', 25, '123055', 33);
+INSERT INTO STAT_I_NA_U VALUES (10521,10, '0/2', '0', '5/6', '83.3', '0/1', '0', '5/7', '71.4', '2/4', '1/1', '0', 24, '401507003', 33);
+INSERT INTO STAT_I_NA_U VALUES (10522,23, '3/8', '37.5', '7/10', '70', '2/4', '50', '9/14', '64.3', '1/2', '2/1', '2', 32, '545100103', 33);
+INSERT INTO STAT_I_NA_U VALUES (10523,3, '0/0', '0', '0/0', '0', '1/3', '33.3', '1/3', '33.3', '0/1', '0/0', '0', 8, '603417007', 33);
+INSERT INTO STAT_I_NA_U VALUES (10524,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '302411008', 33);
+INSERT INTO STAT_I_NA_U VALUES (10525,8, '2/3', '66.7', '3/6', '50', '0/1', '0', '3/7', '42.9', '1/1', '0/1', '2', 13, '603415008', 23);
+INSERT INTO STAT_I_NA_U VALUES (10526,11, '1/2', '50', '5/8', '62.5', '0/0', '0', '5/8', '62.5', '0/1', '4/1', '3', 24, '122018', 23);
+INSERT INTO STAT_I_NA_U VALUES (10527,5, '3/4', '75', '1/1', '100', '0/0', '0', '1/1', '100', '0/0', '0/1', '1', 12, '400100233', 23);
+INSERT INTO STAT_I_NA_U VALUES (10528,16, '5/5', '100', '1/2', '50', '3/5', '60', '4/7', '57.1', '1/2', '2/1', '2', 21, '432801064', 23);
+INSERT INTO STAT_I_NA_U VALUES (10529,14, '0/0', '0', '1/5', '20', '4/7', '57.1', '5/12', '41.7', '0/5', '2/2', '0', 26, '165704003', 23);
+INSERT INTO STAT_I_NA_U VALUES (10530,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '302416008', 23);
+INSERT INTO STAT_I_NA_U VALUES (10531,17, '3/3', '100', '4/9', '44.4', '2/6', '33.3', '6/15', '40', '1/10', '1/0', '8', 32, '123055', 23);
+INSERT INTO STAT_I_NA_U VALUES (10532,4, '4/4', '100', '0/1', '0', '0/1', '0', '0/2', '0', '3/2', '2/3', '1', 19, '401507003', 23);
+INSERT INTO STAT_I_NA_U VALUES (10533,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '603418003', 23);
+INSERT INTO STAT_I_NA_U VALUES (10534,10, '4/4', '100', '3/9', '33.3', '0/2', '0', '3/11', '27.3', '1/6', '2/2', '0', 21, '545100103', 23);
+INSERT INTO STAT_I_NA_U VALUES (10535,9, '0/0', '0', '0/0', '0', '3/7', '42.9', '3/7', '42.9', '0/3', '1/0', '0', 27, '603417007', 23);
+INSERT INTO STAT_I_NA_U VALUES (10536,0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/0', '0/0', '0', 5, '302411008', 23);
+INSERT INTO STAT_I_NA_U VALUES (10537,0, '0/2', '0', '0/5', '0', '0/3', '0', '0/8', '0', '1/4', '1/2', '0', 19, '802104062', 23);
+INSERT INTO STAT_I_NA_U VALUES (10538,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '869012004', 23);
+INSERT INTO STAT_I_NA_U VALUES (10539,21, '2/5', '40', '8/12', '66.7', '1/5', '20', '9/17', '52.9', '0/3', '1/3', '3', 40, '123066', 23);
+INSERT INTO STAT_I_NA_U VALUES (10540,4, '2/2', '100', '1/1', '100', '0/0', '0', '1/1', '100', '1/2', '1/1', '2', 14, '802102327', 23);
+INSERT INTO STAT_I_NA_U VALUES (10541,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '869016021', 23);
+INSERT INTO STAT_I_NA_U VALUES (10542,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '869013016', 23);
+INSERT INTO STAT_I_NA_U VALUES (10543,10, '0/0', '0', '5/9', '55.6', '0/2', '0', '5/11', '45.5', '2/8', '1/1', '1', 33, '223005', 23);
+INSERT INTO STAT_I_NA_U VALUES (10544,5, '3/4', '75', '1/3', '33.3', '0/0', '0', '1/3', '33.3', '0/6', '0/2', '0', 26, '123064', 23);
+INSERT INTO STAT_I_NA_U VALUES (10545,18, '0/0', '0', '3/5', '60', '4/8', '50', '7/13', '53.8', '0/2', '3/4', '8', 30, '123065', 23);
+INSERT INTO STAT_I_NA_U VALUES (10546,21, '5/5', '100', '5/8', '62.5', '2/4', '50', '7/12', '58.3', '1/6', '1/4', '2', 38, '506803019', 23);
+INSERT INTO STAT_I_NA_U VALUES (10547,8, '2/3', '66.7', '3/6', '50', '0/1', '0', '3/7', '42.9', '1/1', '0/1', '2', 13, '603415008', 23);
+INSERT INTO STAT_I_NA_U VALUES (10548,11, '1/2', '50', '5/8', '62.5', '0/0', '0', '5/8', '62.5', '0/1', '4/1', '3', 24, '122018', 23);
+INSERT INTO STAT_I_NA_U VALUES (10549,5, '3/4', '75', '1/1', '100', '0/0', '0', '1/1', '100', '0/0', '0/1', '1', 12, '400100233', 23);
+INSERT INTO STAT_I_NA_U VALUES (10550,16, '5/5', '100', '1/2', '50', '3/5', '60', '4/7', '57.1', '1/2', '2/1', '2', 21, '432801064', 23);
+INSERT INTO STAT_I_NA_U VALUES (10551,14, '0/0', '0', '1/5', '20', '4/7', '57.1', '5/12', '41.7', '0/5', '2/2', '0', 26, '165704003', 23);
+INSERT INTO STAT_I_NA_U VALUES (10552,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '302416008', 23);
+INSERT INTO STAT_I_NA_U VALUES (10553,17, '3/3', '100', '4/9', '44.4', '2/6', '33.3', '6/15', '40', '1/10', '1/0', '8', 32, '123055', 23);
+INSERT INTO STAT_I_NA_U VALUES (10554,4, '4/4', '100', '0/1', '0', '0/1', '0', '0/2', '0', '3/2', '2/3', '1', 19, '401507003', 23);
+INSERT INTO STAT_I_NA_U VALUES (10555,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '603418003', 23);
+INSERT INTO STAT_I_NA_U VALUES (10556,10, '4/4', '100', '3/9', '33.3', '0/2', '0', '3/11', '27.3', '1/6', '2/2', '0', 21, '545100103', 23);
+INSERT INTO STAT_I_NA_U VALUES (10557,9, '0/0', '0', '0/0', '0', '3/7', '42.9', '3/7', '42.9', '0/3', '1/0', '0', 27, '603417007', 23);
+INSERT INTO STAT_I_NA_U VALUES (10558,0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/0', '0/0', '0', 5, '302411008', 23);
+INSERT INTO STAT_I_NA_U VALUES (10559,0, '0/2', '0', '0/5', '0', '0/3', '0', '0/8', '0', '1/4', '1/2', '0', 19, '802104062', 23);
+INSERT INTO STAT_I_NA_U VALUES (10560,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '869012004', 23);
+INSERT INTO STAT_I_NA_U VALUES (10561,21, '2/5', '40', '8/12', '66.7', '1/5', '20', '9/17', '52.9', '0/3', '1/3', '3', 40, '123066', 23);
+INSERT INTO STAT_I_NA_U VALUES (10562,4, '2/2', '100', '1/1', '100', '0/0', '0', '1/1', '100', '1/2', '1/1', '2', 14, '802102327', 23);
+INSERT INTO STAT_I_NA_U VALUES (10563,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '869016021', 23);
+INSERT INTO STAT_I_NA_U VALUES (10564,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '869013016', 23);
+INSERT INTO STAT_I_NA_U VALUES (10565,10, '0/0', '0', '5/9', '55.6', '0/2', '0', '5/11', '45.5', '2/8', '1/1', '1', 33, '223005', 23);
+INSERT INTO STAT_I_NA_U VALUES (10566,5, '3/4', '75', '1/3', '33.3', '0/0', '0', '1/3', '33.3', '0/6', '0/2', '0', 26, '123064', 23);
+INSERT INTO STAT_I_NA_U VALUES (10567,18, '0/0', '0', '3/5', '60', '4/8', '50', '7/13', '53.8', '0/2', '3/4', '8', 30, '123065', 23);
+INSERT INTO STAT_I_NA_U VALUES (10568,21, '5/5', '100', '5/8', '62.5', '2/4', '50', '7/12', '58.3', '1/6', '1/4', '2', 38, '506803019', 23);
+INSERT INTO STAT_I_NA_U VALUES (10569,15, '3/4', '75', '0/0', '0', '4/7', '57.1', '4/7', '57.1', '0/1', '0/0', '3', 14, '169207034', 34);
+INSERT INTO STAT_I_NA_U VALUES (10570,10, '1/2', '50', '3/3', '100', '1/5', '20', '4/8', '50', '0/0', '2/3', '4', 22, '123033', 34);
+INSERT INTO STAT_I_NA_U VALUES (10571,15, '2/2', '100', '2/3', '66.7', '3/4', '75', '5/7', '71.4', '1/1', '1/0', '4', 21, '502797030', 34);
+INSERT INTO STAT_I_NA_U VALUES (10572,2, '2/2', '100', '0/0', '0', '0/2', '0', '0/2', '0', '0/1', '2/2', '4', 20, '557004011', 34);
+INSERT INTO STAT_I_NA_U VALUES (10573,5, '2/2', '100', '0/0', '0', '1/1', '100', '1/1', '100', '0/2', '0/1', '1', 19, '459412005', 34);
+INSERT INTO STAT_I_NA_U VALUES (10574,5, '0/0', '0', '1/1', '100', '1/3', '33.3', '2/4', '50', '0/0', '1/2', '4', 21, '503012004', 34);
+INSERT INTO STAT_I_NA_U VALUES (10575,0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/0', '0/0', '0', 3, '501514138', 34);
+INSERT INTO STAT_I_NA_U VALUES (10576,11, '5/5', '100', '3/6', '50', '0/0', '0', '3/6', '50', '2/5', '0/2', '2', 25, '513699056', 34);
+INSERT INTO STAT_I_NA_U VALUES (10577,17, '3/3', '100', '4/4', '100', '2/6', '33.3', '6/10', '60', '0/5', '0/1', '2', 21, '223509015', 34);
+INSERT INTO STAT_I_NA_U VALUES (10578,15, '3/4', '75', '6/11', '54.5', '0/0', '0', '6/11', '54.5', '3/4', '3/5', '4', 24, '557000024', 34);
+INSERT INTO STAT_I_NA_U VALUES (10579,2, '0/0', '0', '1/1', '100', '0/1', '0', '1/2', '50', '0/0', '0/0', '0', 5, '502912009', 34);
+INSERT INTO STAT_I_NA_U VALUES (10580,4, '2/2', '100', '1/1', '100', '0/0', '0', '1/1', '100', '0/0', '1/0', '0', 4, '155515006', 34);
+INSERT INTO STAT_I_NA_U VALUES (10581,10, '0/0', '0', '2/3', '66.7', '2/4', '50', '4/7', '57.1', '0/0', '2/2', '0', 20, '606904001', 34);
+INSERT INTO STAT_I_NA_U VALUES (10582,0, '0/0', '0', '0/1', '0', '0/0', '0', '0/1', '0', '0/0', '0/0', '0', 3, '734514007', 34);
+INSERT INTO STAT_I_NA_U VALUES (10583,12, '4/5', '80', '4/7', '57.1', '0/1', '0', '4/8', '50', '1/1', '0/2', '2', 24, '315014010', 34);
+INSERT INTO STAT_I_NA_U VALUES (10584,3, '1/1', '100', '1/3', '33.3', '0/2', '0', '1/5', '20', '0/3', '2/1', '3', 28, '401506016', 34);
+INSERT INTO STAT_I_NA_U VALUES (10585,8, '1/2', '50', '2/3', '66.7', '1/2', '50', '3/5', '60', '0/1', '0/3', '2', 19, '728307011', 34);
+INSERT INTO STAT_I_NA_U VALUES (10586,4, '2/4', '50', '1/2', '50', '0/0', '0', '1/2', '50', '4/0', '0/0', '4', 28, '348012007', 34);
+INSERT INTO STAT_I_NA_U VALUES (10587,17, '8/9', '88.9', '3/6', '50', '1/2', '50', '4/8', '50', '3/3', '0/0', '0', 29, '122039', 34);
+INSERT INTO STAT_I_NA_U VALUES (10588,11, '2/4', '50', '3/9', '33.3', '1/3', '33.3', '4/12', '33.3', '1/3', '1/5', '1', 21, '123054', 34);
+INSERT INTO STAT_I_NA_U VALUES (10589,2, '0/2', '0', '1/1', '100', '0/1', '0', '1/2', '50', '0/1', '1/2', '0', 8, '220012', 34);
+INSERT INTO STAT_I_NA_U VALUES (10590,2, '0/0', '0', '1/3', '33.3', '0/0', '0', '1/3', '33.3', '0/0', '0/0', '0', 8, '642804001', 34);
+INSERT INTO STAT_I_NA_U VALUES (10591,9, '1/1', '100', '4/6', '66.7', '0/0', '0', '4/6', '66.7', '1/3', '0/3', '2', 22, '506812002', 30);
+INSERT INTO STAT_I_NA_U VALUES (10592,4, '2/3', '66.7', '1/1', '100', '0/1', '0', '1/2', '50', '1/2', '0/1', '0', 9, '432808024', 30);
+INSERT INTO STAT_I_NA_U VALUES (10593,8, '4/6', '66.7', '2/11', '18.2', '0/4', '0', '2/15', '13.3', '1/3', '3/1', '10', 30, '122084', 30);
+INSERT INTO STAT_I_NA_U VALUES (10594,7, '2/3', '66.7', '1/2', '50', '1/7', '14.3', '2/9', '22.2', '1/2', '1/3', '2', 29, '600510009', 30);
+INSERT INTO STAT_I_NA_U VALUES (10595,2, '0/0', '0', '1/1', '100', '0/0', '0', '1/1', '100', '0/0', '0/1', '0', 7, '601201167', 30);
+INSERT INTO STAT_I_NA_U VALUES (10596,9, '3/4', '75', '3/6', '50', '0/1', '0', '3/7', '42.9', '1/5', '0/3', '0', 27, '213005', 30);
+INSERT INTO STAT_I_NA_U VALUES (10597,9, '3/6', '50', '3/4', '75', '0/0', '0', '3/4', '75', '1/7', '0/0', '0', 27, '105118001', 30);
+INSERT INTO STAT_I_NA_U VALUES (10598,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '431898035', 30);
+INSERT INTO STAT_I_NA_U VALUES (10599,17, '6/7', '85.7', '4/5', '80', '1/3', '33.3', '5/8', '62.5', '2/4', '2/2', '1', 31, '153404007', 30);
+INSERT INTO STAT_I_NA_U VALUES (10600,0, '0/0', '0', '0/0', '0', '0/2', '0', '0/2', '0', '0/1', '0/1', '0', 18, '642417047', 30);
+INSERT INTO STAT_I_NA_U VALUES (10601,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '642401157', 30);
+INSERT INTO STAT_I_NA_U VALUES (10602,5, '1/1', '100', '2/3', '66.7', '0/2', '0', '2/5', '40', '1/0', '1/2', '0', 11, '123100', 30);
+INSERT INTO STAT_I_NA_U VALUES (10603,16, '3/3', '100', '5/7', '71.4', '1/4', '25', '6/11', '54.5', '0/3', '1/1', '0', 27, '124002', 30);
+INSERT INTO STAT_I_NA_U VALUES (10604,3, '1/2', '50', '1/1', '100', '0/3', '0', '1/4', '25', '0/0', '0/2', '0', 13, '169207034', 30);
+INSERT INTO STAT_I_NA_U VALUES (10605,13, '4/7', '57.1', '0/2', '0', '3/4', '75', '3/6', '50', '1/2', '2/1', '4', 24, '123033', 30);
+INSERT INTO STAT_I_NA_U VALUES (10606,10, '6/7', '85.7', '2/3', '66.7', '0/5', '0', '2/8', '25', '1/1', '2/0', '2', 25, '502797030', 30);
+INSERT INTO STAT_I_NA_U VALUES (10607,0, '0/0', '0', '0/0', '0', '0/1', '0', '0/1', '0', '0/1', '1/2', '1', 12, '557004011', 30);
+INSERT INTO STAT_I_NA_U VALUES (10608,7, '0/0', '0', '2/2', '100', '1/2', '50', '3/4', '75', '1/1', '0/0', '0', 14, '459412005', 30);
+INSERT INTO STAT_I_NA_U VALUES (10609,8, '0/0', '0', '4/6', '66.7', '0/0', '0', '4/6', '66.7', '0/1', '1/1', '1', 17, '503012004', 30);
+INSERT INTO STAT_I_NA_U VALUES (10610,2, '0/0', '0', '1/3', '33.3', '0/0', '0', '1/3', '33.3', '1/4', '0/0', '0', 11, '513699056', 30);
+INSERT INTO STAT_I_NA_U VALUES (10611,0, '0/0', '0', '0/0', '0', '0/4', '0', '0/4', '0', '0/5', '1/1', '2', 24, '223509015', 30);
+INSERT INTO STAT_I_NA_U VALUES (10612,4, '0/0', '0', '2/3', '66.7', '0/3', '0', '2/6', '33.3', '1/7', '1/4', '4', 22, '642416013', 30);
+INSERT INTO STAT_I_NA_U VALUES (10613,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '557000024', 30);
+INSERT INTO STAT_I_NA_U VALUES (10614,24, '6/9', '66.7', '6/11', '54.5', '2/3', '66.7', '8/14', '57.1', '3/4', '2/1', '5', 27, '123092', 35);
+INSERT INTO STAT_I_NA_U VALUES (10616,15, '1/4', '25', '4/4', '100', '2/3', '66.7', '6/7', '85.7', '0/0', '0/0', '1', 21, '431805016', 35);
+INSERT INTO STAT_I_NA_U VALUES (10617,14, '0/0', '0', '4/7', '57.1', '2/7', '28.6', '6/14', '42.9', '0/3', '1/0', '10', 34, '802106007', 35);
+INSERT INTO STAT_I_NA_U VALUES (10618,7, '0/0', '0', '2/4', '50', '1/2', '50', '3/6', '50', '2/5', '2/0', '1', 27, '107504016', 35);
+INSERT INTO STAT_I_NA_U VALUES (10619,3, '0/0', '0', '0/0', '0', '1/3', '33.3', '1/3', '33.3', '0/0', '0/0', '0', 6, '410912027', 35);
+INSERT INTO STAT_I_NA_U VALUES (10620,0, '0/0', '0', '0/0', '0', '0/3', '0', '0/3', '0', '0/0', '0/1', '4', 12, '169211013', 35);
+INSERT INTO STAT_I_NA_U VALUES (10621,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 2, '107598172', 35);
+INSERT INTO STAT_I_NA_U VALUES (10622,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '223915004', 35);
+INSERT INTO STAT_I_NA_U VALUES (10623,6, '2/2', '100', '2/8', '25', '0/0', '0', '2/8', '25', '1/2', '4/1', '1', 30, '123015', 35);
+INSERT INTO STAT_I_NA_U VALUES (10624,15, '1/2', '50', '4/6', '66.7', '2/3', '66.7', '6/9', '66.7', '5/2', '0/0', '2', 22, '460505034', 35);
+INSERT INTO STAT_I_NA_U VALUES (10625,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 3, '706110026', 35);
+INSERT INTO STAT_I_NA_U VALUES (10626,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 1, '433914003', 35);
+INSERT INTO STAT_I_NA_U VALUES (10627,3, '0/0', '0', '0/0', '0', '1/1', '100', '1/1', '100', '0/0', '0/0', '0', 10, '116029', 35);
+INSERT INTO STAT_I_NA_U VALUES (10628,10, '3/4', '75', '2/4', '50', '1/4', '25', '3/8', '37.5', '1/3', '0/1', '7', 33, '405709003', 35);
+INSERT INTO STAT_I_NA_U VALUES (10629,8, '0/0', '0', '1/2', '50', '2/5', '40', '3/7', '42.9', '0/1', '1/1', '0', 30, '828110012', 35);
+INSERT INTO STAT_I_NA_U VALUES (10630,20, '2/2', '100', '0/1', '0', '6/9', '66.7', '6/10', '60', '1/0', '0/3', '1', 26, '408709012', 35);
+INSERT INTO STAT_I_NA_U VALUES (10631,17, '4/6', '66.7', '2/2', '100', '3/3', '100', '5/5', '100', '0/4', '0/3', '0', 18, '223708009', 35);
+INSERT INTO STAT_I_NA_U VALUES (10632,0, '0/0', '0', '0/1', '0', '0/0', '0', '0/1', '0', '0/1', '0/0', '0', 7, '604816013', 35);
+INSERT INTO STAT_I_NA_U VALUES (10633,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '557113015', 35);
+INSERT INTO STAT_I_NA_U VALUES (10634,6, '0/0', '0', '3/3', '100', '0/0', '0', '3/3', '100', '1/10', '0/1', '1', 28, '600607001', 35);
+INSERT INTO STAT_I_NA_U VALUES (10635,3, '1/1', '100', '1/1', '100', '0/3', '0', '1/4', '25', '0/1', '0/0', '1', 14, '439811005', 35);
+INSERT INTO STAT_I_NA_U VALUES (10636,15, '6/6', '100', '3/5', '60', '1/5', '20', '4/10', '40', '3/1', '0/3', '4', 30, '208006', 35);
+INSERT INTO STAT_I_NA_U VALUES (10637,7, '1/2', '50', '3/4', '75', '0/0', '0', '3/4', '75', '1/3', '0/2', '1', 22, '439810018', 24);
+INSERT INTO STAT_I_NA_U VALUES (10638,15, '3/5', '60', '6/8', '75', '0/4', '0', '6/12', '50', '0/12', '0/3', '5', 32, '630216053', 24);
+INSERT INTO STAT_I_NA_U VALUES (10639,12, '0/0', '0', '3/5', '60', '2/4', '50', '5/9', '55.6', '1/10', '1/2', '2', 36, '402617004', 24);
+INSERT INTO STAT_I_NA_U VALUES (10640,22, '3/4', '75', '5/12', '41.7', '3/5', '60', '8/17', '47.1', '1/2', '0/2', '7', 35, '122082', 24);
+INSERT INTO STAT_I_NA_U VALUES (10641,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '431814019', 24);
+INSERT INTO STAT_I_NA_U VALUES (10642,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '438314009', 24);
+INSERT INTO STAT_I_NA_U VALUES (10643,10, '2/2', '100', '4/7', '57.1', '0/0', '0', '4/7', '57.1', '0/5', '1/0', '0', 18, '411210004', 24);
+INSERT INTO STAT_I_NA_U VALUES (10644,2, '0/4', '0', '1/1', '100', '0/0', '0', '1/1', '100', '1/2', '0/1', '0', 9, '302814003', 24);
+INSERT INTO STAT_I_NA_U VALUES (10645,15, '0/1', '0', '6/10', '60', '1/6', '16.7', '7/16', '43.8', '1/4', '1/1', '0', 31, '401506024', 24);
+INSERT INTO STAT_I_NA_U VALUES (10646,9, '4/4', '100', '1/2', '50', '1/5', '20', '2/7', '28.6', '1/1', '1/1', '3', 17, '348014035', 24);
+INSERT INTO STAT_I_NA_U VALUES (10647,15, '6/8', '75', '3/9', '33.3', '1/2', '50', '4/11', '36.4', '2/2', '0/2', '0', 22, '509706024', 24);
+INSERT INTO STAT_I_NA_U VALUES (10648,19, '3/5', '60', '5/6', '83.3', '2/7', '28.6', '7/13', '53.8', '0/3', '0/1', '4', 29, '431805016', 24);
+INSERT INTO STAT_I_NA_U VALUES (10649,6, '0/0', '0', '0/3', '0', '2/5', '40', '2/8', '25', '0/4', '0/1', '7', 34, '802106007', 24);
+INSERT INTO STAT_I_NA_U VALUES (10650,3, '0/0', '0', '0/1', '0', '1/2', '50', '1/3', '33.3', '0/2', '0/1', '2', 11, '107504016', 24);
+INSERT INTO STAT_I_NA_U VALUES (10651,0, '0/0', '0', '0/1', '0', '0/0', '0', '0/1', '0', '0/0', '0/2', '3', 8, '169211013', 24);
+INSERT INTO STAT_I_NA_U VALUES (10652,0, '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0', '0/0', '0/0', '0', 0, '107598172', 24);
+INSERT INTO STAT_I_NA_U VALUES (10653,3, '1/2', '50', '1/1', '100', '0/0', '0', '1/1', '100', '1/2', '0/1', '0', 6, '660016010', 24);
+INSERT INTO STAT_I_NA_U VALUES (10654,14, '3/5', '60', '4/6', '66.7', '1/1', '100', '5/7', '71.4', '0/7', '1/0', '1', 25, '223915004', 24);
+INSERT INTO STAT_I_NA_U VALUES (10655,8, '0/2', '0', '1/5', '20', '2/5', '40', '3/10', '30', '1/4', '0/0', '2', 27, '460505034', 24);
+
+~SUDIJE_UTAKMICE~
+INSERT INTO SUDIJE_UTAKMICE VALUES(1111,20);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1112,30);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1113, 21);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1114, 22);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1115, 22);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1116, 25);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1117, 23);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1118, 32);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1119, 24);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1120, 33);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1121, 25);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1122, 34);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1123, 26);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1124, 31);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1125, 27);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1126, 29);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1127, 28);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1128, 35);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1129, 29);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1130, 21);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1131, 39);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1132, 25);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1133, 31);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1134, 33);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1135, 32);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1136, 29);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1137, 33);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1138, 23);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1139, 34);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1140, 30);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1141, 35);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1142, 24);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1143, 20);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1144, 25);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1145, 21);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1146, 32);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1147,33);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1148, 23);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1149, 30);
+INSERT INTO SUDIJE_UTAKMICE VALUES (1150, 21);

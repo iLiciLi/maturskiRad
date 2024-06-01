@@ -1,0 +1,140 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="F646ACB3-F4A2-973E-BFDF-DD68DB46F263" name="SUDIJA_UTAKMICA">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:15:40 UTC</createdTime>
+<generatorID>8858855F-A2EF-6166-F05E-895949964099</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="id" id="D2AF9F2B-5609-6585-F615-86217EF4A4CB">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:15:40 UTC</createdTime>
+<generatorID>E0C109C6-FECA-0EA0-EBC6-B6ECE33F4485</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>2</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,2,2</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="id1" id="16EBFFF6-56A0-490F-9685-FCAE77664CDB">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:15:40 UTC</createdTime>
+<generatorID>0339FC41-7D17-E5A8-9D93-CFF73A3ECD3E</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>2</dataTypePrecision>
+<dataTypeScale>2</dataTypeScale>
+<ownDataTypeParameters>,2,2</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="SUDIJA_id" id="18E5E8F0-40F2-9A44-FC18-CAD1E11495E8">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:15:40 UTC</createdTime>
+<generatorID>1BC136BC-2FE1-55F9-3A6E-94776DA36DAD</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>1</dataTypePrecision>
+<dataTypeScale>5</dataTypeScale>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="F18BD9C6-0AE0-F258-7DC6-FBB3E2484A2E" referredColumn="3C9B4AC6-69AA-AC06-15C3-55B9AD1AFB34"/>
+</associations>
+</Column>
+<Column name="id_domacina" id="CA54D95E-C5D3-A570-21B4-ADDFAB972502">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:31:18 UTC</createdTime>
+<generatorID>C3926D69-66D6-0F73-EB01-4FA212A18DF9</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="id_protivnika" id="182F377D-3D19-8AC6-21B2-42204A19C8BD">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:31:18 UTC</createdTime>
+<generatorID>970F3991-F13D-33FE-3B40-0C9CA2C58755</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="id_dvorane" id="B279F175-6254-6076-CA5C-43CA3AFBB82A">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:31:18 UTC</createdTime>
+<generatorID>D6B5A3B3-EF18-FCFF-A636-8DAC8667E654</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="id11" id="34E5C5B0-2D95-E64D-E8F6-215554841A25">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:31:18 UTC</createdTime>
+<generatorID>6D811E0F-F74C-009D-B228-2B012F0087A1</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="434FB059-B5CA-EA27-12B7-A2E67DB8992A" name="SUDIJA_UTAKMICA_PK">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:15:40 UTC</createdTime>
+<generatorID>C1218A09-CE03-E984-BA7D-C56D23ED18A7</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="D2AF9F2B-5609-6585-F615-86217EF4A4CB"/>
+<colUsage columnID="16EBFFF6-56A0-490F-9685-FCAE77664CDB"/>
+<colUsage columnID="18E5E8F0-40F2-9A44-FC18-CAD1E11495E8"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="FD8355E7-226D-9A41-09B4-512712DECC5C" name="SUDIJA_UTAKMICA_UTAKMICA_FK">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:31:18 UTC</createdTime>
+<generatorID>8F3B9727-1592-0B1C-4083-0CD7F2EAAD09</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+</ind_PK_UK>
+<ind_PK_UK id="EE99E74D-F7C3-CB97-6324-15CF3CE94F88" name="SUDIJA_UTAKMICA_SUDIJA_FK">
+<createdBy>Pavle</createdBy>
+<createdTime>2024-05-24 08:31:18 UTC</createdTime>
+<generatorID>6374B46D-7A50-F452-D9C7-874A8741EEB5</generatorID>
+<ownerDesignName>pocetnaBazaMaturskiRad</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="18E5E8F0-40F2-9A44-FC18-CAD1E11495E8"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>
